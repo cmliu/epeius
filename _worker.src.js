@@ -573,7 +573,7 @@ function 配置信息(密码, 域名地址) {
 	const 指纹 = 'randomized';
 	
 	const v2ray = `${协议类型}://${encodeURIComponent(密码)}@${地址}:${端口}?security=${传输层安全[0]}&sni=${SNI}&fp=${指纹}&type=${传输层协议}&host=${伪装域名}&path=${encodeURIComponent(路径)}#${encodeURIComponent(别名)}`
-	const clash = `- {name: ${别名}, server: ${地址}, port: ${端口}, udp: false, client-fingerprint: ${指纹}, type: ${协议类型}, password: ${密码}, sni: ${SNI}, skip-cert-verify: true, network: ${传输层协议}, ws-opts: {path: ${路径}, headers: {Host: ${伪装域名}}}}`;
+	const clash = `- {name: ${别名}, server: ${地址}, port: ${端口}, udp: true, client-fingerprint: ${指纹}, type: ${协议类型}, password: ${密码}, sni: ${SNI}, skip-cert-verify: true, network: ${传输层协议}, ws-opts: {path: ${路径}, headers: {Host: ${伪装域名}}}}`;
 	
 	return [v2ray,clash];
 }
@@ -717,7 +717,7 @@ https://github.com/cmliu/epeius
 				url = `${subProtocol}://${subconverter}/sub?target=singbox&url=${encodeURIComponent(url)}&insert=false&config=${encodeURIComponent(subconfig)}&emoji=true&list=false&tfo=false&scv=true&fdn=false&sort=false&new_name=true`;
 				isBase64 = false;
 			} else if (userAgent.includes('surge') || _url.searchParams.has('surge')) {
-				url = `${subProtocol}://${subconverter}/sub?target=surge&ver=4&url=${encodeURIComponent(url)}&insert=false&config=${encodeURIComponent(subconfig)}&emoji=true&list=false&xudp=false&udp=false&tfo=false&expand=true&scv=true&fdn=false`;
+				url = `${subProtocol}://${subconverter}/sub?target=surge&ver=4&url=${encodeURIComponent(url)}&insert=false&config=${encodeURIComponent(subconfig)}&emoji=true&list=false&xudp=false&udp=true&tfo=false&expand=true&scv=true&fdn=false`;
 				isBase64 = false;
 			}
 		}
