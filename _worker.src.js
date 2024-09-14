@@ -895,7 +895,7 @@ function subAddresses(host,pw,userAgent,newAddressesapi,newAddressescsv) {
 			}
 		}
 		if (port == "-1") port = "443";
-		
+		address = address.replace("[", "").replace("]", "") // clash 支持 [address]:port 格式
 		let 伪装域名 = host ;
 		let 最终路径 = '/?ed=2560' ;
 		let 节点备注 = '';
