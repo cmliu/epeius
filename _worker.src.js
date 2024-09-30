@@ -128,13 +128,9 @@ export default {
 				//const url = new URL(request.url);
 				switch (url.pathname) {
 				case '/':
-					const envKey = env.URL302 ? 'URL302' : (env.URL ? 'URL' : null);
-					if (envKey) {
-						const URLs = await ADD(env[envKey]);
-						const URL = URLs[Math.floor(Math.random() * URLs.length)];
-						return envKey === 'URL302' ? Response.redirect(URL, 302) : fetch(new Request(URL, request));
-					}
-					return new Response(JSON.stringify(request.cf, null, 4), { status: 200 });
+					if (env.URL302) return Response.redirect(env.URL302, 302);
+					else if (env.URL) return await proxyURL(env.URL, url);
+					else return new Response(JSON.stringify(request.cf, null, 4), { status: 200 });
 				case `/${fakeUserID}`:
 					const fakeConfig = await getTrojanConfig(password, request.headers.get('Host'), sub, 'CF-Workers-SUB', RproxyIP, url);
 					return new Response(`${fakeConfig}`, { status: 200 });
@@ -187,7 +183,9 @@ export default {
 						});
 					}
 				default:
-					return new Response("Incorrect password!!!", { status: 404 });
+					if (env.URL302) return Response.redirect(env.URL302, 302);
+					else if (env.URL) return await proxyURL(env.URL, url);
+					else return new Response('不用怀疑！你PASSWORD就是错的！！！', { status: 404 });
 				}
 			} else {
 				proxyIP = url.searchParams.get('proxyip') || proxyIP;
@@ -394,32 +392,39 @@ async function handleTCPOutBound(remoteSocket, addressRemote, portRemote, rawCli
 	async function connectAndWrite(address, port, socks = false) {
 		log(`connected to ${address}:${port}`);
 		//if (/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(address)) address = `${atob('d3d3Lg==')}${address}${atob('LmlwLjA5MDIyNy54eXo=')}`;
-		const tcpSocket2 = socks ? await socks5Connect(addressType, address, port, log)
+		const tcpSocket = socks ? await socks5Connect(addressType, address, port, log)
 		: connect({
 			hostname: address,
 			port
 		});
-		remoteSocket.value = tcpSocket2;
+		remoteSocket.value = tcpSocket;
 		//log(`connected to ${address}:${port}`);
-		const writer = tcpSocket2.writable.getWriter();
+		const writer = tcpSocket.writable.getWriter();
 		await writer.write(rawClientData);
 		writer.releaseLock();
-		return tcpSocket2;
+		return tcpSocket;
 	}
 	async function retry() {
-		let tcpSocket2
 		if (enableSocks) {
-			tcpSocket2 = await connectAndWrite(addressRemote, portRemote, true);
+			tcpSocket = await connectAndWrite(addressRemote, portRemote, true);
 		} else {
-			if (!proxyIP || proxyIP == '') proxyIP = atob('cHJveHlpcC5meHhrLmRlZHluLmlv');
-			tcpSocket2 = await connectAndWrite(proxyIP || addressRemote, portRemote);
+			if (!proxyIP || proxyIP == '') {
+				proxyIP = atob('cHJveHlpcC5meHhrLmRlZHluLmlv');
+			} else if (proxyIP.includes(']:')) {
+				portRemote = proxyIP.split(']:')[1] || portRemote;
+				proxyIP = proxyIP.split(']:')[0] || proxyIP;
+			} else if (proxyIP.split(':').length === 2) {
+				portRemote = proxyIP.split(':')[1] || portRemote;
+				proxyIP = proxyIP.split(':')[0] || proxyIP;
+			}
+			tcpSocket = await connectAndWrite(proxyIP || addressRemote, portRemote);
 		}
-		tcpSocket2.closed.catch((error) => {
+		tcpSocket.closed.catch((error) => {
 			console.log("retry tcpSocket closed error", error);
 		}).finally(() => {
 			safeCloseWebSocket(webSocket);
 		});
-		remoteSocketToWS(tcpSocket2, webSocket, null, log);
+		remoteSocketToWS(tcpSocket, webSocket, null, log);
 	}
 	let useSocks = false;
 	if( go2Socks5s.length > 0 && enableSocks ) useSocks = await useSocks5Pattern(addressRemote);
@@ -579,6 +584,39 @@ async function ADD(envadd) {
 	const add = addtext.split(',');
 	//console.log(add);
 	return add ;
+}
+
+async function proxyURL(proxyURL, url) {
+	const URLs = await ADD(proxyURL);
+	const fullURL = URLs[Math.floor(Math.random() * URLs.length)];
+	// 解析目标 URL
+	let parsedURL = new URL(fullURL);
+	console.log(parsedURL);
+	// 提取并可能修改 URL 组件
+	let URLProtocol = parsedURL.protocol.slice(0, -1) || 'https';
+	let URLHostname = parsedURL.hostname;
+	let URLPathname = parsedURL.pathname;
+	let URLSearch = parsedURL.search;
+	// 处理 pathname
+	if (URLPathname.charAt(URLPathname.length - 1) == '/') {
+		URLPathname = URLPathname.slice(0, -1);
+	}
+	URLPathname += url.pathname;
+	// 构建新的 URL
+	let newURL = `${URLProtocol}://${URLHostname}${URLPathname}${URLSearch}`;
+	// 反向代理请求
+	let response = await fetch(newURL);
+	// 创建新的响应
+	let newResponse = new Response(response.body, {
+		status: response.status,
+		statusText: response.statusText,
+		headers: response.headers
+	});
+	// 添加自定义头部，包含 URL 信息
+	//newResponse.headers.set('X-Proxied-By', 'Cloudflare Worker');
+	//newResponse.headers.set('X-Original-URL', fullURL);
+	newResponse.headers.set('X-New-URL', newURL);
+	return newResponse;
 }
 
 function checkSUB(host) {

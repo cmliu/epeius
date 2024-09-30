@@ -140,9 +140,9 @@ Telegram交流群：[@CMLiussss](https://t.me/CMLiussss)，**感谢[Alice Networ
 | 变量名 | 示例 | 备注 |
 |--------|---------|-----|
 | PASSWORD | `auto` | 可以取任意值 |
-| PROXYIP | `proxyip.fxxk.dedyn.io` | 备选作为访问CFCDN站点的代理节点(支持多ProxyIP, ProxyIP之间使用`,`或`换行`作间隔) |
+| PROXYIP | `proxyip.fxxk.dedyn.io:443` | 备选作为访问CFCDN站点的代理节点(支持多ProxyIP, ProxyIP之间使用`,`或`换行`作间隔) |
 | SOCKS5  | `user:password@127.0.0.1:1080` | 优先作为访问CFCDN站点的SOCKS5代理(支持多socks5, socks5之间使用`,`或`换行`作间隔) |
-| GO2SOCKS5  | `blog.cmliussss.com`,`*ip111.cn` | 设置`SOCKS5`变量之后，可设置强制使用socks5访问名单(`*`可作为通配符，`换行`作多元素间隔) |
+| GO2SOCKS5  | `blog.cmliussss.com`,`*.ip111.cn`,`*google.com` | 设置`SOCKS5`变量之后，可设置强制使用socks5访问名单(`*`可作为通配符，`换行`作多元素间隔) |
 | ADD | `www.csgo.com:2087,icook.hk` | 本地优选域名/优选IP(支持多元素之间`,`或`换行`作间隔) |
 | ADDAPI | [https://raw.github.../addressesapi.txt](https://raw.githubusercontent.com/cmliu/WorkerVless2sub/main/addressesapi.txt) | 不解释, 懂得都懂 |
 | ADDCSV | [https://raw.github.../addressescsv.csv](https://raw.githubusercontent.com/cmliu/WorkerVless2sub/main/addressescsv.csv) | 不解释, 懂得都懂 |
@@ -155,7 +155,7 @@ Telegram交流群：[@CMLiussss](https://t.me/CMLiussss)，**感谢[Alice Networ
 | SUBNAME | `epeius` | 订阅名称 | 
 | RPROXYIP | `false` | 设为 true 即可强制获取订阅器分配的ProxyIP(需订阅器支持)|
 | URL302 | `https://t.me/CMLiussss` | 主页302跳转(支持多url, url之间使用`,`或`换行`作间隔, 小白别用) |
-| URL | `https://t.me/CMLiussss` | 主页伪装(支持多url, url之间使用`,`或`换行`作间隔, 乱设容易触发反诈) |
+| URL | `https://blog.cmliussss.com` | 主页反代伪装(支持多url, url之间使用`,`或`换行`作间隔, 乱设容易触发反诈) |
 | CFEMAIL | `admin@gmail.com` | CF账户邮箱(与`CFKEY`都填上后, 订阅信息将显示请求使用量, 小白别用) | 
 | CFKEY | `c6a944b5c956b6c18c2352880952bced8b85e` | CF账户Global API Key(与`CFEMAIL`都填上后, 订阅信息将显示请求使用量, 小白别用) |
 
@@ -194,6 +194,20 @@ Telegram交流群：[@CMLiussss](https://t.me/CMLiussss)，**感谢[Alice Networ
 
 ## Star 星星走起
 [![Stargazers over time](https://starchart.cc/cmliu/epeius.svg?variant=adaptive)](https://starchart.cc/cmliu/epeius)
+
+## 已适配客户端
+### Windows
+   - [v2rayN](https://github.com/2dust/v2rayN)
+   - clash.meta（[FlClash](https://github.com/chen08209/FlClash)，[clash-verge-rev
+](https://github.com/clash-verge-rev/clash-verge-rev)，[Clash Nyanpasu](https://github.com/keiko233/clash-nyanpasu)）
+### IOS
+   - Surge，小火箭
+   - sing-box（[SFI](https://sing-box.sagernet.org/zh/clients/apple/)）
+### 安卓
+   - clash.meta（[ClashMetaForAndroid](https://github.com/MetaCubeX/ClashMetaForAndroid)，[FlClash](https://github.com/chen08209/FlClash)）
+   - sing-box（[SFA](https://github.com/SagerNet/sing-box)）
+### MacOS
+   - clash.meta（[FlClash](https://github.com/chen08209/FlClash)）
 
 # 感谢
 [ca110us](https://github.com/ca110us/epeius)、[xream](https://github.com/xream)、[3Kmfi6HP](https://github.com/3Kmfi6HP/EDtunnel/tree/trojan)、[zizifn](https://github.com/zizifn/edgetunnel)、[emn178](https://github.com/emn178/js-sha256)、[ACL4SSR](https://github.com/ACL4SSR/ACL4SSR/tree/master/Clash/config)、[SHIJS1999](https://github.com/SHIJS1999/cloudflare-worker-vless-ip)、<a href="https://url.cmliussss.com/alice"><img src="https://alicenetworks.net/templates/lagom2/assets/img/logo/logo_big.194980063.png" width="150" height="75" alt="Alice Networks LTD"/></a>、
