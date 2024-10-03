@@ -192,14 +192,19 @@ Telegram交流群：[@CMLiussss](https://t.me/CMLiussss)，**感谢[Alice Networ
    /socks5://user:password@127.0.0.1:1080
    ```
 
+**当你的`ADDAPI`可作为`PROXYIP`时，可在`ADDAPI`变量末位添加`?proxyip=true`，即可在生成节点时使用优选IP自身作为`PROXYIP`**
+- 指定 `ADDAPI` 作为 `PROXYIP` 案例
+   ```url
+   https://raw.githubusercontent.com/cmliu/WorkerVless2sub/main/addressesapi.txt?proxyip=true
+   ```
+
 ## Star 星星走起
 [![Stargazers over time](https://starchart.cc/cmliu/epeius.svg?variant=adaptive)](https://starchart.cc/cmliu/epeius)
 
 ## 已适配客户端
 ### Windows
    - [v2rayN](https://github.com/2dust/v2rayN)
-   - clash.meta（[FlClash](https://github.com/chen08209/FlClash)，[clash-verge-rev
-](https://github.com/clash-verge-rev/clash-verge-rev)，[Clash Nyanpasu](https://github.com/keiko233/clash-nyanpasu)）
+   - clash.meta（[FlClash](https://github.com/chen08209/FlClash)，[clash-verge-rev](https://github.com/clash-verge-rev/clash-verge-rev)，[Clash Nyanpasu](https://github.com/keiko233/clash-nyanpasu)）
 ### IOS
    - Surge，小火箭
    - sing-box（[SFI](https://sing-box.sagernet.org/zh/clients/apple/)）
