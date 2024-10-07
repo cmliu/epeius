@@ -63,7 +63,7 @@ if (!isValidSHA224(sha224Password)) {
 
 let parsedSocks5Address = {}; 
 let enableSocks = false;
-
+let httpsPorts = ["2053","2083","2087","2096","8443"];
 export default {
 	async fetch(request, env, ctx) {
 		try {
@@ -88,7 +88,7 @@ export default {
 			socks5s = await ADD(socks5Address);
 			socks5Address = socks5s[Math.floor(Math.random() * socks5s.length)];
 			socks5Address = socks5Address.split('//')[1] || socks5Address;
-
+			if (env.CFPORTS) httpsPorts = await ADD(env.CFPORTS);
 			sub = env.SUB || sub;
 			subconverter = env.SUBAPI || subconverter;
 			if( subconverter.includes("http://") ){
@@ -948,7 +948,8 @@ function subAddresses(host,pw,userAgent,newAddressesapi,newAddressescsv) {
 			伪装域名 = proxyhosts[Math.floor(Math.random() * proxyhosts.length)];
 			节点备注 = ` 已启用临时域名中转服务，请尽快绑定自定义域！`;
 		}
-		if (proxyIPPool.includes(`${address}:${port}`) && !httpsPorts.includes(port)) 最终路径 += `&proxyip=${address}:${port}`;
+		const matchingProxyIP = proxyIPPool.find(proxyIP => proxyIP.includes(address));
+		if (matchingProxyIP) 最终路径 += `&proxyip=${matchingProxyIP}`;
 		let 密码 = pw;
 		if (!userAgent.includes('subconverter')) 密码 = encodeURIComponent(pw);
 
@@ -1000,8 +1001,16 @@ async function getAddressesapi(api) {
 					// 如果URL带有'proxyip=true'，则将内容添加到proxyIPPool
 					proxyIPPool = proxyIPPool.concat((await ADD(content)).map(item => {
 						const baseItem = item.split('#')[0] || item;
-						return baseItem.includes(':') ? baseItem : `${baseItem}:443`;
-					}));
+						if (baseItem.includes(':')) {
+							const port = baseItem.split(':')[1];
+							if (!httpsPorts.includes(port)) {
+								return baseItem;
+							}
+						} else {
+							return `${baseItem}:443`;
+						}
+						return null; // 不符合条件时返回 null
+					}).filter(Boolean)); // 过滤掉 null 值
 				}
 				// 将内容添加到newapi中
 				newapi += content + '\n';
@@ -1069,7 +1078,7 @@ async function getAddressescsv(tls) {
 			
 					const formattedAddress = `${ipAddress}:${port}#${dataCenter}`;
 					newAddressescsv.push(formattedAddress);
-					if (csvUrl.includes('proxyip=true') && columns[tlsIndex].toUpperCase() == 'true') {
+					if (csvUrl.includes('proxyip=true') && columns[tlsIndex].toUpperCase() == 'true' && !httpsPorts.includes(port)) {
 						// 如果URL带有'proxyip=true'，则将内容添加到proxyIPPool
 						proxyIPPool.push(`${ipAddress}:${port}`);
 					}
