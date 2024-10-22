@@ -45,6 +45,9 @@ let proxyhosts = [];//本地代理域名池
 let proxyhostsURL = 'https://raw.githubusercontent.com/cmliu/CFcdnVmess2sub/main/proxyhosts';//在线代理域名池URL
 let go2Socks5s = [
 	'*ttvnw.net',
+	'*tapecontent.net',
+	'*cloudatacdn.com',
+	'*.loadshare.org',
 ];
 
 let fakeUserID ;
@@ -414,7 +417,7 @@ async function handleTCPOutBound(remoteSocket, addressRemote, portRemote, rawCli
 			tcpSocket = await connectAndWrite(addressRemote, portRemote, true);
 		} else {
 			if (!proxyIP || proxyIP == '') {
-				proxyIP = atob('cHJveHlpcC5meHhrLmRlZHluLmlv');
+				proxyIP = atob('cHJveHlpcC50cDEuY21saXVzc3NzLmNvbQ==');
 			} else if (proxyIP.includes(']:')) {
 				portRemote = proxyIP.split(']:')[1] || portRemote;
 				proxyIP = proxyIP.split(']:')[0] || proxyIP;
@@ -422,6 +425,7 @@ async function handleTCPOutBound(remoteSocket, addressRemote, portRemote, rawCli
 				portRemote = proxyIP.split(':')[1] || portRemote;
 				proxyIP = proxyIP.split(':')[0] || proxyIP;
 			}
+			if (proxyIP.includes('.tp')) portRemote = proxyIP.split('.tp')[1].split('.')[0] || portRemote;
 			tcpSocket = await connectAndWrite(proxyIP || addressRemote, portRemote);
 		}
 		tcpSocket.closed.catch((error) => {
@@ -628,17 +632,18 @@ function checkSUB(host) {
 	if ((!sub || sub == '') && (addresses.length + addressesapi.length + addressescsv.length) == 0){
 		addresses = [
 			'Join.my.Telegram.channel.CMLiussss.to.unlock.more.premium.nodes.cf.090227.xyz#加入我的频道t.me/CMLiussss解锁更多优选节点',
+			'127.0.0.1:1234#CFnat',
 			'visa.cn:443',
-			'www.visa.com:8443',
-			'cis.visa.com:2053',
-			'africa.visa.com:2083',
-			'www.visa.com.sg:2087',
-			'www.visaeurope.at:2096',
-			'www.visa.com.mt:8443',
-			'qa.visamiddleeast.com',
+			'singapore.com:8443',
+			'japan.com:2053',
+			'brazil.com:2083',
+			'russia.com:2087',
+			'www.gov.ua:2096',
+			'www.gco.gov.qa:8443',
+			'www.gov.se',
 			'time.is',
 			'www.wto.org:8443',
-			'chatgpt.com:2087',
+			'fbi.gov:2087',
 			'icook.hk',
 			//'104.17.0.0#IPv4',
 			'[2606:4700::]#IPv6'
