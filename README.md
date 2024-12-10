@@ -166,6 +166,7 @@ Telegram交流群：[@CMLiussss](https://t.me/CMLiussss)，**感谢[Alice Networ
 | ADDAPI | [https://raw.github.../addressesapi.txt](https://raw.githubusercontent.com/cmliu/WorkerVless2sub/main/addressesapi.txt) | 不解释, 懂得都懂 |
 | ADDCSV | [https://raw.github.../addressescsv.csv](https://raw.githubusercontent.com/cmliu/WorkerVless2sub/main/addressescsv.csv) | 不解释, 懂得都懂 |
 | DLS | `8` | `ADDCSV`测速结果满足速度下限 | 
+| CSVREMARK | `1` | CSV备注所在列偏移量 |
 | TGTOKEN | `6894123456:XXXXXXXXXX0qExVsBPUhHDAbXXXXXqWXgBA` | 发送TG通知的机器人token | 
 | TGID | `6946912345` | 接收TG通知的账户数字ID | 
 | SUB | `Trojan.fxxk.dedyn.io` | 优选订阅生成器域名(使用订阅器将放弃`ADD`内的本地优选订阅内容) |

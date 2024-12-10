@@ -44,7 +44,7 @@ export default {
 		try {
 			const UA = request.headers.get('User-Agent') || 'null';
 			const userAgent = UA.toLowerCase();
-			password = env.PASSWORD || password;
+			password = env.PASSWORD || env.pswd || env.UUID || env.uuid || password;
 			if (!password) {
 				return new Response('请设置你的PASSWORD变量，或尝试重试部署，检查变量是否生效？', { 
 					status: 404,
@@ -55,8 +55,7 @@ export default {
 			}
 			sha224Password = env.SHA224 || env.SHA224PASS || sha224(password);
 			//console.log(sha224Password);
-			subEmoji = env.SUBEMOJI || env.EMOJI || subEmoji;
-			if(subEmoji == '0') subEmoji = 'false';
+
 			const currentDate = new Date();
 			currentDate.setHours(0, 0, 0, 0); // 设置时间为当天
 			const timestamp = Math.ceil(currentDate.getTime() / 1000);
@@ -71,7 +70,7 @@ export default {
 			
 			fakeHostName = `${fakeUserIDMD5.slice(6, 9)}.${fakeUserIDMD5.slice(13, 19)}`;
 			
-			proxyIP = env.PROXYIP || proxyIP;
+			proxyIP = env.PROXYIP || env.proxyip || proxyIP;
 			proxyIPs = await ADD(proxyIP);
 			proxyIP = proxyIPs[Math.floor(Math.random() * proxyIPs.length)];
 
@@ -79,16 +78,9 @@ export default {
 			socks5s = await ADD(socks5Address);
 			socks5Address = socks5s[Math.floor(Math.random() * socks5s.length)];
 			socks5Address = socks5Address.split('//')[1] || socks5Address;
+			if (env.GO2SOCKS5) go2Socks5s = await ADD(env.GO2SOCKS5);
 			if (env.CFPORTS) httpsPorts = await ADD(env.CFPORTS);
-			sub = env.SUB || sub;
-			subConverter = env.SUBAPI || subConverter;
-			if( subConverter.includes("http://") ){
-				subConverter = subConverter.split("//")[1];
-				subProtocol = 'http';
-			} else {
-				subConverter = subConverter.split("//")[1] || subConverter;
-			}
-			subConfig = env.SUBCONFIG || subConfig;
+
 			if (socks5Address) {
 				try {
 					parsedSocks5Address = socks5AddressParser(socks5Address);
@@ -104,19 +96,32 @@ export default {
 			} else {
 				RproxyIP = env.RPROXYIP || !proxyIP ? 'true' : 'false';
 			}
-			if (env.ADD) addresses = await ADD(env.ADD);
-			if (env.ADDAPI) addressesapi = await ADD(env.ADDAPI);
-			if (env.ADDCSV) addressescsv = await ADD(env.ADDCSV);
-			DLS = env.DLS || DLS;
-			remarkIndex = env.CSVREMARK || remarkIndex;
-			BotToken = env.TGTOKEN || BotToken;
-			ChatID = env.TGID || ChatID; 
-			if(env.GO2SOCKS5) go2Socks5s = await ADD(env.GO2SOCKS5);
+
 			const upgradeHeader = request.headers.get("Upgrade");
 			const url = new URL(request.url);
-			if (url.searchParams.has('sub') && url.searchParams.get('sub') !== '') sub = url.searchParams.get('sub');
-			FileName = env.SUBNAME || FileName;
 			if (!upgradeHeader || upgradeHeader !== "websocket") {
+				if (env.ADD) addresses = await ADD(env.ADD);
+				if (env.ADDAPI) addressesapi = await ADD(env.ADDAPI);
+				if (env.ADDCSV) addressescsv = await ADD(env.ADDCSV);
+				DLS = Number(env.DLS) || DLS;
+				remarkIndex = Number(env.CSVREMARK) || remarkIndex;
+				BotToken = env.TGTOKEN || BotToken;
+				ChatID = env.TGID || ChatID; 
+				FileName = env.SUBNAME || FileName;
+				subEmoji = env.SUBEMOJI || env.EMOJI || subEmoji;
+				if(subEmoji == '0') subEmoji = 'false';
+
+				sub = env.SUB || sub;
+				subConverter = env.SUBAPI || subConverter;
+				if (subConverter.includes("http://") ){
+					subConverter = subConverter.split("//")[1];
+					subProtocol = 'http';
+				} else {
+					subConverter = subConverter.split("//")[1] || subConverter;
+				}
+				subConfig = env.SUBCONFIG || subConfig;
+				if (url.searchParams.has('sub') && url.searchParams.get('sub') !== '') sub = url.searchParams.get('sub');
+
 				if (url.searchParams.has('proxyip')) {
 					path = `/?ed=2560&proxyip=${url.searchParams.get('proxyip')}`;
 					RproxyIP = 'false';
@@ -427,7 +432,7 @@ async function handleTCPOutBound(remoteSocket, addressRemote, portRemote, rawCli
 		remoteSocketToWS(tcpSocket, webSocket, null, log);
 	}
 	let useSocks = false;
-	if( go2Socks5s.length > 0 && enableSocks ) useSocks = await useSocks5Pattern(addressRemote);
+	if (go2Socks5s.length > 0 && enableSocks ) useSocks = await useSocks5Pattern(addressRemote);
 	let tcpSocket = await connectAndWrite(addressRemote, portRemote, useSocks);
 	remoteSocketToWS(tcpSocket, webSocket, retry, log);
 }
@@ -729,7 +734,7 @@ async function get特洛伊Config(password, hostName, sub, UA, RproxyIP, _url) {
 		});
 
 		let socks5List = '';
-		if( go2Socks5s.length > 0 && enableSocks ) {
+		if (go2Socks5s.length > 0 && enableSocks ) {
 			socks5List = `${decodeURIComponent('SOCKS5%EF%BC%88%E7%99%BD%E5%90%8D%E5%8D%95%EF%BC%89%3A%20')}`;
 			if ( go2Socks5s.includes(atob('YWxsIGlu')) || go2Socks5s.includes(atob('Kg==')) ) socks5List += `${decodeURIComponent('%E6%89%80%E6%9C%89%E6%B5%81%E9%87%8F')}\n`;
 			else socks5List += `\n  ${go2Socks5s.join('\n  ')}\n`;
