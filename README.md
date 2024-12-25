@@ -181,6 +181,9 @@ Telegram交流群：[@CMLiussss](https://t.me/CMLiussss)，**感谢[Alice Networ
 
 # 注意事项
 
+### 开启在线编辑优选列表
+- 绑定名为`KV`的KV空间，即可在无`SUB`的前提下，在配置页实现在线编辑`ADD`与`ADDAPI`优选列表；
+
 ### **关于`SOCKS5`与`PROXYIP`：**
 - 填入`SOCKS5`后，将停用`PROXYIP`。请确保**二者选其一使用**！
 
