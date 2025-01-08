@@ -3,19 +3,17 @@ import { connect } from "cloudflare:sockets";
 
 let password = '';
 let proxyIP = '';
-let sub = ''; 
+//let sub = '';
 let subConverter = 'SUBAPI.fxxk.dedyn.io';// clash订阅转换后端，目前使用CM的订阅转换功能。自带虚假节点信息防泄露
 let subConfig = "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/config/ACL4SSR_Online_Mini_MultiMode.ini"; //订阅配置文件
 let subProtocol = 'https';
 let subEmoji = 'true';
 let socks5Address = '';
-let parsedSocks5Address = {}; 
+let parsedSocks5Address = {};
 let enableSocks = false;
 
-let fakeUserID ;
-let fakeHostName ;
 const expire = 4102329600;//2099-12-31
-let proxyIPs ;
+let proxyIPs;
 let socks5s;
 let go2Socks5s = [
 	'*ttvnw.net',
@@ -29,13 +27,13 @@ let addressescsv = [];
 let DLS = 8;
 let remarkIndex = 1;//CSV备注所在列偏移量
 let FileName = 'epeius';
-let BotToken ='';
-let ChatID =''; 
+let BotToken = '';
+let ChatID = '';
 let proxyhosts = [];
 let proxyhostsURL = '';
 let RproxyIP = 'false';
-let httpsPorts = ["2053","2083","2087","2096","8443"];
-let sha224Password ;
+let httpsPorts = ["2053", "2083", "2087", "2096", "8443"];
+let sha224Password;
 const regex = /^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|\[.*\]):?(\d+)?#?(.*)?$/;
 let proxyIPPool = [];
 let path = '/?ed=2560';
@@ -46,9 +44,9 @@ export default {
 		try {
 			const UA = request.headers.get('User-Agent') || 'null';
 			const userAgent = UA.toLowerCase();
-			password = env.PASSWORD || env.pswd || env.UUID || env.uuid || password;
+			password = env.PASSWORD || env.pswd || env.UUID || env.uuid || env.TOKEN || password;
 			if (!password) {
-				return new Response('请设置你的PASSWORD变量，或尝试重试部署，检查变量是否生效？', { 
+				return new Response('请设置你的PASSWORD变量，或尝试重试部署，检查变量是否生效？', {
 					status: 404,
 					headers: {
 						"Content-Type": "text/plain;charset=utf-8",
@@ -62,16 +60,16 @@ export default {
 			currentDate.setHours(0, 0, 0, 0); // 设置时间为当天
 			const timestamp = Math.ceil(currentDate.getTime() / 1000);
 			const fakeUserIDMD5 = await MD5MD5(`${password}${timestamp}`);
-			fakeUserID = [
+			const fakeUserID = [
 				fakeUserIDMD5.slice(0, 8),
 				fakeUserIDMD5.slice(8, 12),
 				fakeUserIDMD5.slice(12, 16),
 				fakeUserIDMD5.slice(16, 20),
 				fakeUserIDMD5.slice(20)
 			].join('-');
-			
-			fakeHostName = `${fakeUserIDMD5.slice(6, 9)}.${fakeUserIDMD5.slice(13, 19)}`;
-			
+
+			const fakeHostName = `${fakeUserIDMD5.slice(6, 9)}.${fakeUserIDMD5.slice(13, 19)}`;
+
 			proxyIP = env.PROXYIP || env.proxyip || proxyIP;
 			proxyIPs = await ADD(proxyIP);
 			proxyIP = proxyIPs[Math.floor(Math.random() * proxyIPs.length)];
@@ -82,14 +80,14 @@ export default {
 			socks5Address = socks5Address.split('//')[1] || socks5Address;
 			if (env.GO2SOCKS5) go2Socks5s = await ADD(env.GO2SOCKS5);
 			if (env.CFPORTS) httpsPorts = await ADD(env.CFPORTS);
-			if (env.BAN) banHosts = await 整理(env.BAN);
+			if (env.BAN) banHosts = await ADD(env.BAN);
 			if (socks5Address) {
 				try {
 					parsedSocks5Address = socks5AddressParser(socks5Address);
 					RproxyIP = env.RPROXYIP || 'false';
 					enableSocks = true;
 				} catch (err) {
-  					/** @type {Error} */ 
+					/** @type {Error} */
 					let e = err;
 					console.log(e.toString());
 					RproxyIP = env.RPROXYIP || !proxyIP ? 'true' : 'false';
@@ -108,14 +106,14 @@ export default {
 				DLS = Number(env.DLS) || DLS;
 				remarkIndex = Number(env.CSVREMARK) || remarkIndex;
 				BotToken = env.TGTOKEN || BotToken;
-				ChatID = env.TGID || ChatID; 
+				ChatID = env.TGID || ChatID;
 				FileName = env.SUBNAME || FileName;
 				subEmoji = env.SUBEMOJI || env.EMOJI || subEmoji;
-				if(subEmoji == '0') subEmoji = 'false';
-				if (env.LINK) link = await ADD(env.LINK) ;
-				sub = env.SUB || sub;
+				if (subEmoji == '0') subEmoji = 'false';
+				if (env.LINK) link = await ADD(env.LINK);
+				let sub = env.SUB || '';
 				subConverter = env.SUBAPI || subConverter;
-				if (subConverter.includes("http://") ){
+				if (subConverter.includes("http://")) {
 					subConverter = subConverter.split("//")[1];
 					subProtocol = 'http';
 				} else {
@@ -135,65 +133,65 @@ export default {
 					RproxyIP = 'false';
 				}
 				switch (url.pathname) {
-				case '/':
-					if (env.URL302) return Response.redirect(env.URL302, 302);
-					else if (env.URL) return await proxyURL(env.URL, url);
-					else return new Response(JSON.stringify(request.cf, null, 4), {
-						status: 200,
-						headers: {
-							'content-type': 'application/json',
-						},
-					});
-				case `/${fakeUserID}`:
-					const fakeConfig = await get特洛伊Config(password, request.headers.get('Host'), sub, 'CF-Workers-SUB', RproxyIP, url, env);
-					return new Response(`${fakeConfig}`, { status: 200 });
-				case `/${password}/edit`:
-					const html = await KV(request, env);
-					return html;
-				case `/${password}`:
-					await sendMessage(`#获取订阅 ${FileName}`, request.headers.get('CF-Connecting-IP'), `UA: ${UA}</tg-spoiler>\n域名: ${url.hostname}\n<tg-spoiler>入口: ${url.pathname + url.search}</tg-spoiler>`);
-					const 特洛伊Config = await get特洛伊Config(password, request.headers.get('Host'), sub, UA, RproxyIP, url, env);
-					const now = Date.now();
-					//const timestamp = Math.floor(now / 1000);
-					const today = new Date(now);
-					today.setHours(0, 0, 0, 0);
-					const UD = Math.floor(((now - today.getTime())/86400000) * 24 * 1099511627776 / 2);
-					let pagesSum = UD;
-					let workersSum = UD;
-					let total = 24 * 1099511627776 ;
+					case '/':
+						if (env.URL302) return Response.redirect(env.URL302, 302);
+						else if (env.URL) return await proxyURL(env.URL, url);
+						else return new Response(JSON.stringify(request.cf, null, 4), {
+							status: 200,
+							headers: {
+								'content-type': 'application/json',
+							},
+						});
+					case `/${fakeUserID}`:
+						const fakeConfig = await get特洛伊Config(password, request.headers.get('Host'), sub, 'CF-Workers-SUB', RproxyIP, url, fakeUserID, fakeHostName, env);
+						return new Response(`${fakeConfig}`, { status: 200 });
+					case `/${password}/edit`:
+						const html = await KV(request, env);
+						return html;
+					case `/${password}`:
+						await sendMessage(`#获取订阅 ${FileName}`, request.headers.get('CF-Connecting-IP'), `UA: ${UA}</tg-spoiler>\n域名: ${url.hostname}\n<tg-spoiler>入口: ${url.pathname + url.search}</tg-spoiler>`);
+						const 特洛伊Config = await get特洛伊Config(password, request.headers.get('Host'), sub, UA, RproxyIP, url, fakeUserID, fakeHostName, env);
+						const now = Date.now();
+						//const timestamp = Math.floor(now / 1000);
+						const today = new Date(now);
+						today.setHours(0, 0, 0, 0);
+						const UD = Math.floor(((now - today.getTime()) / 86400000) * 24 * 1099511627776 / 2);
+						let pagesSum = UD;
+						let workersSum = UD;
+						let total = 24 * 1099511627776;
 
-					if (userAgent && (userAgent.includes('mozilla') || userAgent.includes('subconverter'))){
-						return new Response(`<div style="font-size:13px;">${特洛伊Config}</div>`, {
-							status: 200,
-							headers: {
-								"Content-Type": "text/html;charset=utf-8",
-								"Profile-Update-Interval": "6",
-								"Subscription-Userinfo": `upload=${pagesSum}; download=${workersSum}; total=${total}; expire=${expire}`,
-								"Cache-Control": "no-store",
-							}
-						});
-					} else {
-						return new Response(`${特洛伊Config}`, {
-							status: 200,
-							headers: {
-								"Content-Disposition": `attachment; filename=${FileName}; filename*=utf-8''${encodeURIComponent(FileName)}`,
-								"Content-Type": "text/plain;charset=utf-8",
-								"Profile-Update-Interval": "6",
-								"Subscription-Userinfo": `upload=${pagesSum}; download=${workersSum}; total=${total}; expire=${expire}`,
-							}
-						});
-					}
-				default:
-					if (env.URL302) return Response.redirect(env.URL302, 302);
-					else if (env.URL) return await proxyURL(env.URL, url);
-					else return new Response('不用怀疑！你PASSWORD就是错的！！！', { status: 404 });
+						if (userAgent && (userAgent.includes('mozilla') || userAgent.includes('subconverter'))) {
+							return new Response(`<div style="font-size:13px;">${特洛伊Config}</div>`, {
+								status: 200,
+								headers: {
+									"Content-Type": "text/html;charset=utf-8",
+									"Profile-Update-Interval": "6",
+									"Subscription-Userinfo": `upload=${pagesSum}; download=${workersSum}; total=${total}; expire=${expire}`,
+									"Cache-Control": "no-store",
+								}
+							});
+						} else {
+							return new Response(`${特洛伊Config}`, {
+								status: 200,
+								headers: {
+									"Content-Disposition": `attachment; filename=${FileName}; filename*=utf-8''${encodeURIComponent(FileName)}`,
+									"Content-Type": "text/plain;charset=utf-8",
+									"Profile-Update-Interval": "6",
+									"Subscription-Userinfo": `upload=${pagesSum}; download=${workersSum}; total=${total}; expire=${expire}`,
+								}
+							});
+						}
+					default:
+						if (env.URL302) return Response.redirect(env.URL302, 302);
+						else if (env.URL) return await proxyURL(env.URL, url);
+						else return new Response('不用怀疑！你PASSWORD就是错的！！！', { status: 404 });
 				}
 			} else {
 				socks5Address = url.searchParams.get('socks5') || socks5Address;
 				if (new RegExp('/socks5=', 'i').test(url.pathname)) socks5Address = url.pathname.split('5=')[1];
 				else if (new RegExp('/socks://', 'i').test(url.pathname) || new RegExp('/socks5://', 'i').test(url.pathname)) {
 					socks5Address = url.pathname.split('://')[1].split('#')[0];
-					if (socks5Address.includes('@')){
+					if (socks5Address.includes('@')) {
 						let userPassword = socks5Address.split('@')[0];
 						const base64Regex = /^(?:[A-Z0-9+/]{4})*(?:[A-Z0-9+/]{2}==|[A-Z0-9+/]{3}=)?$/i;
 						if (base64Regex.test(userPassword) && !userPassword.includes(':')) userPassword = atob(userPassword);
@@ -206,7 +204,7 @@ export default {
 						parsedSocks5Address = socks5AddressParser(socks5Address);
 						enableSocks = true;
 					} catch (err) {
-						/** @type {Error} */ 
+						/** @type {Error} */
 						let e = err;
 						console.log(e.toString());
 						enableSocks = false;
@@ -215,7 +213,7 @@ export default {
 					enableSocks = false;
 				}
 
-				if (url.searchParams.has('proxyip')){
+				if (url.searchParams.has('proxyip')) {
 					proxyIP = url.searchParams.get('proxyip');
 					enableSocks = false;
 				} else if (new RegExp('/proxyip=', 'i').test(url.pathname)) {
@@ -348,35 +346,35 @@ async function parse特洛伊Header(buffer) {
 	let addressIndex = 2;
 	let address = "";
 	switch (atype) {
-	case 1:
-		addressLength = 4;
-		address = new Uint8Array(
-			socks5DataBuffer.slice(addressIndex, addressIndex + addressLength)
-		).join(".");
-		break;
-	case 3:
-		addressLength = new Uint8Array(
-			socks5DataBuffer.slice(addressIndex, addressIndex + 1)
-		)[0];
-		addressIndex += 1;
-		address = new TextDecoder().decode(
-			socks5DataBuffer.slice(addressIndex, addressIndex + addressLength)
-		);
-		break;
-	case 4:
-		addressLength = 16;
-		const dataView = new DataView(socks5DataBuffer.slice(addressIndex, addressIndex + addressLength));
-		const ipv6 = [];
-		for (let i = 0; i < 8; i++) {
-			ipv6.push(dataView.getUint16(i * 2).toString(16));
-		}
-		address = ipv6.join(":");
-		break;
-	default:
-		return {
-			hasError: true,
-			message: `invalid addressType is ${atype}`
-		};
+		case 1:
+			addressLength = 4;
+			address = new Uint8Array(
+				socks5DataBuffer.slice(addressIndex, addressIndex + addressLength)
+			).join(".");
+			break;
+		case 3:
+			addressLength = new Uint8Array(
+				socks5DataBuffer.slice(addressIndex, addressIndex + 1)
+			)[0];
+			addressIndex += 1;
+			address = new TextDecoder().decode(
+				socks5DataBuffer.slice(addressIndex, addressIndex + addressLength)
+			);
+			break;
+		case 4:
+			addressLength = 16;
+			const dataView = new DataView(socks5DataBuffer.slice(addressIndex, addressIndex + addressLength));
+			const ipv6 = [];
+			for (let i = 0; i < 8; i++) {
+				ipv6.push(dataView.getUint16(i * 2).toString(16));
+			}
+			address = ipv6.join(":");
+			break;
+		default:
+			return {
+				hasError: true,
+				message: `invalid addressType is ${atype}`
+			};
 	}
 
 	if (!address) {
@@ -400,7 +398,7 @@ async function parse特洛伊Header(buffer) {
 
 async function handleTCPOutBound(remoteSocket, addressRemote, portRemote, rawClientData, webSocket, log, addressType) {
 	async function useSocks5Pattern(address) {
-		if ( go2Socks5s.includes(atob('YWxsIGlu')) || go2Socks5s.includes(atob('Kg==')) ) return true;
+		if (go2Socks5s.includes(atob('YWxsIGlu')) || go2Socks5s.includes(atob('Kg=='))) return true;
 		return go2Socks5s.some(pattern => {
 			let regexPattern = pattern.replace(/\*/g, '.*');
 			let regex = new RegExp(`^${regexPattern}$`, 'i');
@@ -411,10 +409,10 @@ async function handleTCPOutBound(remoteSocket, addressRemote, portRemote, rawCli
 		log(`connected to ${address}:${port}`);
 		//if (/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(address)) address = `${atob('d3d3Lg==')}${address}${atob('LmlwLjA5MDIyNy54eXo=')}`;
 		const tcpSocket = socks ? await socks5Connect(addressType, address, port, log)
-		: connect({
-			hostname: address,
-			port
-		});
+			: connect({
+				hostname: address,
+				port
+			});
 		remoteSocket.value = tcpSocket;
 		//log(`connected to ${address}:${port}`);
 		const writer = tcpSocket.writable.getWriter();
@@ -446,7 +444,7 @@ async function handleTCPOutBound(remoteSocket, addressRemote, portRemote, rawCli
 		remoteSocketToWS(tcpSocket, webSocket, null, log);
 	}
 	let useSocks = false;
-	if (go2Socks5s.length > 0 && enableSocks ) useSocks = await useSocks5Pattern(addressRemote);
+	if (go2Socks5s.length > 0 && enableSocks) useSocks = await useSocks5Pattern(addressRemote);
 	let tcpSocket = await connectAndWrite(addressRemote, portRemote, useSocks);
 	remoteSocketToWS(tcpSocket, webSocket, retry, log);
 }
@@ -480,7 +478,7 @@ function makeReadableWebSocketStream(webSocketServer, earlyDataHeader, log) {
 				controller.enqueue(earlyData);
 			}
 		},
-		pull(controller) {},
+		pull(controller) { },
 		cancel(reason) {
 			if (readableStreamCancel) {
 				return;
@@ -497,7 +495,7 @@ async function remoteSocketToWS(remoteSocket, webSocket, retry, log) {
 	let hasIncomingData = false;
 	await remoteSocket.readable.pipeTo(
 		new WritableStream({
-			start() {},
+			start() { },
 			/**
 			 *
 			 * @param {Uint8Array} chunk
@@ -572,7 +570,7 @@ export {
 //# sourceMappingURL=worker.js.map
 */
 
-function revertFakeInfo(content, userID, hostName, isBase64) {
+function revertFakeInfo(content, userID, hostName, fakeUserID, fakeHostName, isBase64) {
 	if (isBase64) content = atob(content);//Base64解码
 	content = content.replace(new RegExp(fakeUserID, 'g'), userID).replace(new RegExp(fakeHostName, 'g'), hostName);
 	//console.log(content);
@@ -583,7 +581,7 @@ function revertFakeInfo(content, userID, hostName, isBase64) {
 
 async function MD5MD5(text) {
 	const encoder = new TextEncoder();
-  
+
 	const firstPass = await crypto.subtle.digest('MD5', encoder.encode(text));
 	const firstPassArray = Array.from(new Uint8Array(firstPass));
 	const firstHex = firstPassArray.map(b => b.toString(16).padStart(2, '0')).join('');
@@ -591,7 +589,7 @@ async function MD5MD5(text) {
 	const secondPass = await crypto.subtle.digest('MD5', encoder.encode(firstHex.slice(7, 27)));
 	const secondPassArray = Array.from(new Uint8Array(secondPass));
 	const secondHex = secondPassArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  
+
 	return secondHex.toLowerCase();
 }
 
@@ -599,14 +597,14 @@ async function ADD(内容) {
 	// 将制表符、双引号、单引号和换行符都替换为逗号
 	// 然后将连续的多个逗号替换为单个逗号
 	var 替换后的内容 = 内容.replace(/[	|"'\r\n]+/g, ',').replace(/,+/g, ',');
-	
+
 	// 删除开头和结尾的逗号（如果有的话）
 	if (替换后的内容.charAt(0) == ',') 替换后的内容 = 替换后的内容.slice(1);
 	if (替换后的内容.charAt(替换后的内容.length - 1) == ',') 替换后的内容 = 替换后的内容.slice(0, 替换后的内容.length - 1);
-	
+
 	// 使用逗号分割字符串，得到地址数组
 	const 地址数组 = 替换后的内容.split(',');
-	
+
 	return 地址数组;
 }
 
@@ -646,28 +644,28 @@ async function proxyURL(proxyURL, url) {
 function 配置信息(密码, 域名地址) {
 	const 啥啥啥_写的这是啥啊 = 'dHJvamFu';
 	const 协议类型 = atob(啥啥啥_写的这是啥啊);
-	
+
 	const 别名 = FileName;
 	let 地址 = 域名地址;
 	let 端口 = 443;
-	
+
 	const 传输层协议 = 'ws';
 	const 伪装域名 = 域名地址;
 	const 路径 = path;
-	
-	let 传输层安全 = ['tls',true];
+
+	let 传输层安全 = ['tls', true];
 	const SNI = 域名地址;
 	const 指纹 = 'randomized';
-	
-	const v2ray = `${协议类型}://${encodeURIComponent(密码)}@${地址}:${端口}?security=${传输层安全[0]}&sni=${SNI}&alpn=h3&fp=${指纹}&allowInsecure=1&type=${传输层协议}&host=${伪装域名}&path=${encodeURIComponent(路径)}#${encodeURIComponent(别名)}`			  
+
+	const v2ray = `${协议类型}://${encodeURIComponent(密码)}@${地址}:${端口}?security=${传输层安全[0]}&sni=${SNI}&alpn=h3&fp=${指纹}&allowInsecure=1&type=${传输层协议}&host=${伪装域名}&path=${encodeURIComponent(路径)}#${encodeURIComponent(别名)}`
 	const clash = `- {name: ${别名}, server: ${地址}, port: ${端口}, udp: false, client-fingerprint: ${指纹}, type: ${协议类型}, password: ${密码}, sni: ${SNI}, alpn: [h3], skip-cert-verify: true, network: ${传输层协议}, ws-opts: {path: "${路径}", headers: {Host: ${伪装域名}}}}`;
 
-	return [v2ray,clash];
+	return [v2ray, clash];
 }
 
-let subParams = ['sub','base64','b64','clash','singbox','sb','surge'];
+let subParams = ['sub', 'base64', 'b64', 'clash', 'singbox', 'sb', 'surge'];
 const cmad = decodeURIComponent(atob(`dGVsZWdyYW0lMjAlRTQlQkElQTQlRTYlQjUlODElRTclQkUlQTQlMjAlRTYlOEElODAlRTYlOUMlQUYlRTUlQTQlQTclRTQlQkQlQUMlN0UlRTUlOUMlQTglRTclQkElQkYlRTUlOEYlOTElRTclODklOEMhJTNDYnIlM0UKJTNDYSUyMGhyZWYlM0QlMjdodHRwcyUzQSUyRiUyRnQubWUlMkZDTUxpdXNzc3MlMjclM0VodHRwcyUzQSUyRiUyRnQubWUlMkZDTUxpdXNzc3MlM0MlMkZhJTNFJTNDYnIlM0UKLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tJTNDYnIlM0UKZ2l0aHViJTIwJUU5JUExJUI5JUU3JTlCJUFFJUU1JTlDJUIwJUU1JTlEJTgwJTIwU3RhciFTdGFyIVN0YXIhISElM0NiciUzRQolM0NhJTIwaHJlZiUzRCUyN2h0dHBzJTNBJTJGJTJGZ2l0aHViLmNvbSUyRmNtbGl1JTJGZXBlaXVzJTI3JTNFaHR0cHMlM0ElMkYlMkZnaXRodWIuY29tJTJGY21saXUlMkZlcGVpdXMlM0MlMkZhJTNFJTNDYnIlM0UKLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tJTNDYnIlM0UKJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIzJTIz`));
-async function get特洛伊Config(password, hostName, sub, UA, RproxyIP, _url, env) {
+async function get特洛伊Config(password, hostName, sub, UA, RproxyIP, _url, fakeUserID, fakeHostName, env) {
 	if (sub) {
 		const match = sub.match(/^(?:https?:\/\/)?([^\/]+)/);
 		if (match) {
@@ -676,7 +674,7 @@ async function get特洛伊Config(password, hostName, sub, UA, RproxyIP, _url, e
 		const subs = await ADD(sub);
 		if (subs.length > 1) sub = subs[0];
 	} else {
-		if (env.KV){
+		if (env.KV) {
 			await 迁移地址列表(env);
 			const 优选地址列表 = await env.KV.get('ADD.txt');
 			if (优选地址列表) {
@@ -686,7 +684,7 @@ async function get特洛伊Config(password, hostName, sub, UA, RproxyIP, _url, e
 					链接地址: new Set(),
 					优选地址: new Set()
 				};
-				
+
 				for (const 元素 of 优选地址数组) {
 					if (元素.startsWith('https://')) {
 						分类地址.接口地址.add(元素);
@@ -696,14 +694,14 @@ async function get特洛伊Config(password, hostName, sub, UA, RproxyIP, _url, e
 						分类地址.优选地址.add(元素);
 					}
 				}
-				
+
 				addressesapi = [...分类地址.接口地址];
 				link = [...分类地址.链接地址];
 				addresses = [...分类地址.优选地址];
 			}
 		}
 
-		if ((addresses.length + addressesapi.length + addressescsv.length) == 0){
+		if ((addresses.length + addressesapi.length + addressescsv.length) == 0) {
 			// 定义 Cloudflare IP 范围的 CIDR 列表
 			let cfips = [
 				'103.21.244.0/23',
@@ -718,7 +716,7 @@ async function get特洛伊Config(password, hostName, sub, UA, RproxyIP, _url, e
 				'188.114.96.0/21',
 				'190.93.240.0/21',
 			];
-	
+
 			// 生成符合给定 CIDR 范围的随机 IP 地址
 			function generateRandomIPFromCIDR(cidr) {
 				const [base, mask] = cidr.split('/');
@@ -726,13 +724,13 @@ async function get特洛伊Config(password, hostName, sub, UA, RproxyIP, _url, e
 				const subnetMask = 32 - parseInt(mask, 10);
 				const maxHosts = Math.pow(2, subnetMask) - 1;
 				const randomHost = Math.floor(Math.random() * maxHosts);
-	
+
 				const randomIP = baseIP.map((octet, index) => {
 					if (index < 2) return octet;
 					if (index === 2) return (octet & (255 << (subnetMask - 8))) + ((randomHost >> 8) & 255);
 					return (octet & (255 << subnetMask)) + (randomHost & 255);
 				});
-	
+
 				return randomIP.join('.');
 			}
 			addresses = addresses.concat('127.0.0.1:1234#CFnat');
@@ -741,35 +739,35 @@ async function get特洛伊Config(password, hostName, sub, UA, RproxyIP, _url, e
 	}
 
 	const userAgent = UA.toLowerCase();
-	const Config = 配置信息(password , hostName);
+	const Config = 配置信息(password, hostName);
 	const v2ray = Config[0];
 	const clash = Config[1];
 	let proxyhost = "";
-	if (hostName.includes(".workers.dev")){
-		if ( proxyhostsURL && (!proxyhosts || proxyhosts.length == 0)) {
+	if (hostName.includes(".workers.dev")) {
+		if (proxyhostsURL && (!proxyhosts || proxyhosts.length == 0)) {
 			try {
-				const response = await fetch(proxyhostsURL); 
-			
+				const response = await fetch(proxyhostsURL);
+
 				if (!response.ok) {
 					console.error('获取地址时出错:', response.status, response.statusText);
 					return; // 如果有错误，直接返回
 				}
-			
+
 				const text = await response.text();
 				const lines = text.split('\n');
 				// 过滤掉空行或只包含空白字符的行
 				const nonEmptyLines = lines.filter(line => line.trim() !== '');
-			
+
 				proxyhosts = proxyhosts.concat(nonEmptyLines);
 			} catch (error) {
 				//console.error('获取地址时出错:', error);
 			}
-		} 
+		}
 		if (proxyhosts.length != 0) proxyhost = proxyhosts[Math.floor(Math.random() * proxyhosts.length)] + "/";
 	}
-	
-	if ( userAgent.includes('mozilla') && !subParams.some(_searchParams => _url.searchParams.has(_searchParams))) {
-		let surge = `Surge订阅地址:<br><a href="javascript:void(0)" onclick="copyToClipboard('https://${proxyhost}${hostName}/${password}?surge')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${proxyhost}${hostName}/${password}?surge</a>`;
+
+	if (userAgent.includes('mozilla') && !subParams.some(_searchParams => _url.searchParams.has(_searchParams))) {
+		let surge = `Surge订阅地址:<br><a href="javascript:void(0)" onclick="copyToClipboard('https://${proxyhost}${hostName}/${password}?surge','qrcode_4')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${proxyhost}${hostName}/${password}?surge</a><br><div id="qrcode_4" style="margin: 10px 10px 10px 10px;"></div>`;
 		if (hostName.includes(".workers.dev")) surge = "Surge订阅必须绑定自定义域";
 		const newSocks5s = socks5s.map(socks5Address => {
 			if (socks5Address.includes('@')) return socks5Address.split('@')[1];
@@ -778,9 +776,9 @@ async function get特洛伊Config(password, hostName, sub, UA, RproxyIP, _url, e
 		});
 
 		let socks5List = '';
-		if (go2Socks5s.length > 0 && enableSocks ) {
+		if (go2Socks5s.length > 0 && enableSocks) {
 			socks5List = `${decodeURIComponent('SOCKS5%EF%BC%88%E7%99%BD%E5%90%8D%E5%8D%95%EF%BC%89%3A%20')}`;
-			if ( go2Socks5s.includes(atob('YWxsIGlu')) || go2Socks5s.includes(atob('Kg==')) ) socks5List += `${decodeURIComponent('%E6%89%80%E6%9C%89%E6%B5%81%E9%87%8F')}<br>`;
+			if (go2Socks5s.includes(atob('YWxsIGlu')) || go2Socks5s.includes(atob('Kg=='))) socks5List += `${decodeURIComponent('%E6%89%80%E6%9C%89%E6%B5%81%E9%87%8F')}<br>`;
 			else socks5List += `<br>&nbsp;&nbsp;${go2Socks5s.join('<br>&nbsp;&nbsp;')}<br>`;
 		}
 
@@ -805,25 +803,21 @@ async function get特洛伊Config(password, hostName, sub, UA, RproxyIP, _url, e
 
 		const 节点配置页 = `
 			################################################################<br>
-			Subscribe / sub 订阅地址, 支持 Base64、clash-meta、sing-box 订阅格式<br>
+			Subscribe / sub 订阅地址, 点击链接自动 <strong>复制订阅链接</strong> 并 <strong>生成订阅二维码</strong> <br>
 			---------------------------------------------------------------<br>
 			自适应订阅地址:<br>
-			<a href="javascript:void(0)" onclick="copyToClipboard('https://${proxyhost}${hostName}/${password}')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${proxyhost}${hostName}/${password}</a><br>
-			<a href="javascript:void(0)" onclick="copyToClipboard('https://${proxyhost}${hostName}/${password}?sub')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${proxyhost}${hostName}/${password}?sub</a><br>
-			<br>
+			<a href="javascript:void(0)" onclick="copyToClipboard('https://${proxyhost}${hostName}/${password}?sub','qrcode_0')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${proxyhost}${hostName}/${password}</a><br>
+			<div id="qrcode_0" style="margin: 10px 10px 10px 10px;"></div>
 			Base64订阅地址:<br>
-			<a href="javascript:void(0)" onclick="copyToClipboard('https://${proxyhost}${hostName}/${password}?b64')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${proxyhost}${hostName}/${password}?b64</a><br>
-			<a href="javascript:void(0)" onclick="copyToClipboard('https://${proxyhost}${hostName}/${password}?base64')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${proxyhost}${hostName}/${password}?base64</a><br>
-			<br>
+			<a href="javascript:void(0)" onclick="copyToClipboard('https://${proxyhost}${hostName}/${password}?b64','qrcode_1')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${proxyhost}${hostName}/${password}?b64</a><br>
+			<div id="qrcode_1" style="margin: 10px 10px 10px 10px;"></div>
 			clash订阅地址:<br>
-			<a href="javascript:void(0)" onclick="copyToClipboard('https://${proxyhost}${hostName}/${password}?clash')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${proxyhost}${hostName}/${password}?clash</a><br>
-			<br>
+			<a href="javascript:void(0)" onclick="copyToClipboard('https://${proxyhost}${hostName}/${password}?clash','qrcode_2')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${proxyhost}${hostName}/${password}?clash</a><br>
+			<div id="qrcode_2" style="margin: 10px 10px 10px 10px;"></div>
 			singbox订阅地址:<br>
-			<a href="javascript:void(0)" onclick="copyToClipboard('https://${proxyhost}${hostName}/${password}?sb')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${proxyhost}${hostName}/${password}?sb</a><br>
-			<a href="javascript:void(0)" onclick="copyToClipboard('https://${proxyhost}${hostName}/${password}?singbox')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${proxyhost}${hostName}/${password}?singbox</a><br>
-			<br>
-			${surge}<br>
-			<br>
+			<a href="javascript:void(0)" onclick="copyToClipboard('https://${proxyhost}${hostName}/${password}?sb','qrcode_3')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${proxyhost}${hostName}/${password}?sb</a><br>
+			<div id="qrcode_3" style="margin: 10px 10px 10px 10px;"></div>
+			${surge}
 			<strong><a href="javascript:void(0);" id="noticeToggle" onclick="toggleNotice()">实用订阅技巧∨</a></strong><br>
 				<div id="noticeContent" class="notice-content" style="display: none;">
 					<strong>1.</strong> 如您使用的是 PassWall、SSR+ 等路由插件，推荐使用 <strong>Base64订阅地址</strong> 进行订阅；<br>
@@ -840,12 +834,24 @@ async function get特洛伊Config(password, hostName, sub, UA, RproxyIP, _url, e
 					<strong>5.</strong> 如需指定多个参数则需要使用'&'做间隔，例如：<br>
 					&nbsp;&nbsp;https://${proxyhost}${hostName}/${password}?sub=sub.google.com<strong>&</strong>proxyip=proxyip.fxxk.dedyn.io<br>
 				</div>
+			<script src="https://cdn.jsdelivr.net/npm/@keeex/qrcodejs-kx@1.0.2/qrcode.min.js"></script>
 			<script>
-			function copyToClipboard(text) {
+			function copyToClipboard(text, qrcode) {
 				navigator.clipboard.writeText(text).then(() => {
 					alert('已复制到剪贴板');
 				}).catch(err => {
 					console.error('复制失败:', err);
+				});
+				const qrcodeDiv = document.getElementById(qrcode);
+				qrcodeDiv.innerHTML = '';
+				new QRCode(qrcodeDiv, {
+					text: text,
+					width: 220, // 调整宽度
+					height: 220, // 调整高度
+					colorDark: "#000000", // 二维码颜色
+					colorLight: "#ffffff", // 背景颜色
+					correctLevel: QRCode.CorrectLevel.Q, // 设置纠错级别
+					scale: 1 // 调整像素颗粒度
 				});
 			}
 
@@ -878,7 +884,8 @@ async function get特洛伊Config(password, hostName, sub, UA, RproxyIP, _url, e
 			################################################################<br>
 			v2ray<br>
 			---------------------------------------------------------------<br>
-			<a href="javascript:void(0)" onclick="copyToClipboard('${v2ray}')" style="color:blue;text-decoration:underline;cursor:pointer;">${v2ray}</a><br>
+			<a href="javascript:void(0)" onclick="copyToClipboard('${v2ray}','qrcode_v2ray')" style="color:blue;text-decoration:underline;cursor:pointer;">${v2ray}</a><br>
+			<div id="qrcode_v2ray" style="margin: 10px 10px 10px 10px;"></div>
 			---------------------------------------------------------------<br>
 			################################################################<br>
 			clash-meta<br>
@@ -894,7 +901,7 @@ async function get特洛伊Config(password, hostName, sub, UA, RproxyIP, _url, e
 			return 'Error: fetch is not available in this environment.';
 		}
 		// 如果是使用默认域名，则改成一个workers的域名，订阅器会加上代理
-		if (hostName.includes(".workers.dev")){
+		if (hostName.includes(".workers.dev")) {
 			fakeHostName = `${fakeHostName}.workers.dev`;
 		} else {
 			fakeHostName = `${fakeHostName}.xyz`
@@ -906,21 +913,21 @@ async function get特洛伊Config(password, hostName, sub, UA, RproxyIP, _url, e
 		let newAddressescsv = [];
 
 		if (!sub || sub == "") {
-			if(hostName.includes('workers.dev')) {
+			if (hostName.includes('workers.dev')) {
 				if (proxyhostsURL && (!proxyhosts || proxyhosts.length == 0)) {
 					try {
-						const response = await fetch(proxyhostsURL); 
-					
+						const response = await fetch(proxyhostsURL);
+
 						if (!response.ok) {
 							console.error('获取地址时出错:', response.status, response.statusText);
 							return; // 如果有错误，直接返回
 						}
-					
+
 						const text = await response.text();
 						const lines = text.split('\n');
 						// 过滤掉空行或只包含空白字符的行
 						const nonEmptyLines = lines.filter(line => line.trim() !== '');
-					
+
 						proxyhosts = proxyhosts.concat(nonEmptyLines);
 					} catch (error) {
 						console.error('获取地址时出错:', error);
@@ -929,14 +936,14 @@ async function get特洛伊Config(password, hostName, sub, UA, RproxyIP, _url, e
 				// 使用Set对象去重
 				proxyhosts = [...new Set(proxyhosts)];
 			}
-	
+
 			newAddressesapi = await getAddressesapi(addressesapi);
 			newAddressescsv = await getAddressescsv('TRUE');
 			url = `https://${hostName}/${fakeUserID + _url.search}`;
-		} 
+		}
 
-		if (!userAgent.includes(('CF-Workers-SUB').toLowerCase())){
-			if ((userAgent.includes('clash') && !userAgent.includes('nekobox')) || ( _url.searchParams.has('clash'))) {
+		if (!userAgent.includes(('CF-Workers-SUB').toLowerCase())) {
+			if ((userAgent.includes('clash') && !userAgent.includes('nekobox')) || (_url.searchParams.has('clash'))) {
 				url = `${subProtocol}://${subConverter}/sub?target=clash&url=${encodeURIComponent(url)}&insert=false&config=${encodeURIComponent(subConfig)}&emoji=${subEmoji}&list=false&tfo=false&scv=true&fdn=false&sort=false&new_name=true`;
 				isBase64 = false;
 			} else if (userAgent.includes('sing-box') || userAgent.includes('singbox') || _url.searchParams.has('singbox') || _url.searchParams.has('sb')) {
@@ -947,23 +954,24 @@ async function get特洛伊Config(password, hostName, sub, UA, RproxyIP, _url, e
 				isBase64 = false;
 			}
 		}
-		
+
 		try {
 			let content;
 			if ((!sub || sub == "") && isBase64 == true) {
-				content = await subAddresses(fakeHostName,fakeUserID,userAgent,newAddressesapi,newAddressescsv);
+				content = await subAddresses(fakeHostName, fakeUserID, userAgent, newAddressesapi, newAddressescsv);
 			} else {
-				const response = await fetch(url ,{
+				const response = await fetch(url, {
 					headers: {
 						'User-Agent': atob('Q0YtV29ya2Vycy1lcGVpdXMvY21saXU='),
-					}});
+					}
+				});
 				content = await response.text();
 			}
 
 			if (_url.pathname == `/${fakeUserID}`) return content;
-			
-			content = revertFakeInfo(content, password, hostName, isBase64);
-			if (userAgent.includes('surge') || _url.searchParams.has('surge')) content = surge(content, `https://${hostName}/${password}?surge`);	
+
+			content = revertFakeInfo(content, password, hostName, fakeUserID, fakeHostName, isBase64);
+			if (userAgent.includes('surge') || _url.searchParams.has('surge')) content = surge(content, `https://${hostName}/${password}?surge`);
 			return content;
 		} catch (error) {
 			console.error('Error fetching content:', error);
@@ -973,7 +981,7 @@ async function get特洛伊Config(password, hostName, sub, UA, RproxyIP, _url, e
 }
 
 async function sendMessage(type, ip, add_data = "") {
-	if ( BotToken !== '' && ChatID !== ''){
+	if (BotToken !== '' && ChatID !== '') {
 		let msg = "";
 		const response = await fetch(`http://ip-api.com/json/${ip}?lang=zh-CN`);
 		if (response.status == 200) {
@@ -982,8 +990,8 @@ async function sendMessage(type, ip, add_data = "") {
 		} else {
 			msg = `${type}\nIP: ${ip}\n<tg-spoiler>${add_data}`;
 		}
-	
-		let url = "https://api.telegram.org/bot"+ BotToken +"/sendMessage?chat_id=" + ChatID + "&parse_mode=HTML&text=" + encodeURIComponent(msg);
+
+		let url = "https://api.telegram.org/bot" + BotToken + "/sendMessage?chat_id=" + ChatID + "&parse_mode=HTML&text=" + encodeURIComponent(msg);
 		return fetch(url, {
 			method: 'get',
 			headers: {
@@ -1175,12 +1183,12 @@ function isValidIPv4(address) {
 	return ipv4Regex.test(address);
 }
 
-function subAddresses(host,pw,userAgent,newAddressesapi,newAddressescsv) {
+function subAddresses(host, pw, userAgent, newAddressesapi, newAddressescsv) {
 	addresses = addresses.concat(newAddressesapi);
 	addresses = addresses.concat(newAddressescsv);
 	// 使用Set对象去重
 	const uniqueAddresses = [...new Set(addresses)];
-				
+
 	const responseBody = uniqueAddresses.map(address => {
 		let port = "-1";
 		let addressid = address;
@@ -1202,7 +1210,7 @@ function subAddresses(host,pw,userAgent,newAddressesapi,newAddressescsv) {
 				address = parts[0];
 				addressid = parts[1];
 			}
-		
+
 			if (addressid.includes(':')) {
 				addressid = addressid.split(':')[0];
 			}
@@ -1212,7 +1220,7 @@ function subAddresses(host,pw,userAgent,newAddressesapi,newAddressescsv) {
 			addressid = match[3] || address;
 		}
 
-		const httpsPorts = ["2053","2083","2087","2096","8443"];
+		const httpsPorts = ["2053", "2083", "2087", "2096", "8443"];
 		if (!isValidIPv4(address) && port == "-1") {
 			for (let httpsPort of httpsPorts) {
 				if (address.includes(httpsPort)) {
@@ -1222,12 +1230,12 @@ function subAddresses(host,pw,userAgent,newAddressesapi,newAddressescsv) {
 			}
 		}
 		if (port == "-1") port = "443";
-		
-		let 伪装域名 = host ;
-		let 最终路径 = path ;
+
+		let 伪装域名 = host;
+		let 最终路径 = path;
 		let 节点备注 = '';
-		
-		if(proxyhosts.length > 0 && (伪装域名.includes('.workers.dev'))) {
+
+		if (proxyhosts.length > 0 && (伪装域名.includes('.workers.dev'))) {
 			最终路径 = `/${伪装域名}${最终路径}`;
 			伪装域名 = proxyhosts[Math.floor(Math.random() * proxyhosts.length)];
 			节点备注 = ` 已启用临时域名中转服务，请尽快绑定自定义域！`;
@@ -1261,11 +1269,11 @@ async function getAddressesapi(api) {
 		controller.abort(); // 取消所有请求
 	}, 2000); // 2秒后触发
 
-	try {
+	try {   
 		// 使用Promise.allSettled等待所有API请求完成，无论成功或失败
 		// 对api数组进行遍历，对每个API地址发起fetch请求
 		const responses = await Promise.allSettled(api.map(apiUrl => fetch(apiUrl, {
-			method: 'get', 
+			method: 'get',
 			headers: {
 				'Accept': 'text/html,application/xhtml+xml,application/xml;',
 				'User-Agent': atob('Q0YtV29ya2Vycy1lcGVpdXMvY21saXU=')
@@ -1283,15 +1291,15 @@ async function getAddressesapi(api) {
 				const lines = content.split(/\r?\n/);
 				let 节点备注 = '';
 				let 测速端口 = '443';
-				if (lines[0].split(',').length > 3){
+				if (lines[0].split(',').length > 3) {
 					const idMatch = api[index].match(/id=([^&]*)/);
 					if (idMatch) 节点备注 = idMatch[1];
 					const portMatch = api[index].match(/port=([^&]*)/);
 					if (portMatch) 测速端口 = portMatch[1];
-					
+
 					for (let i = 1; i < lines.length; i++) {
 						const columns = lines[i].split(',')[0];
-						if(columns){
+						if (columns) {
 							newapi += `${columns}:${测速端口}${节点备注 ? `#${节点备注}` : ''}\n`;
 							if (api[index].includes('proxyip=true')) proxyIPPool.push(`${columns}:${测速端口}`);
 						}
@@ -1335,39 +1343,39 @@ async function getAddressescsv(tls) {
 	if (!addressescsv || addressescsv.length === 0) {
 		return [];
 	}
-	
+
 	let newAddressescsv = [];
-	
+
 	for (const csvUrl of addressescsv) {
 		try {
 			const response = await fetch(csvUrl);
-		
+
 			if (!response.ok) {
 				console.error('获取CSV地址时出错:', response.status, response.statusText);
 				continue;
 			}
-		
+
 			const text = await response.text();// 使用正确的字符编码解析文本内容
 			let lines;
-			if (text.includes('\r\n')){
+			if (text.includes('\r\n')) {
 				lines = text.split('\r\n');
 			} else {
 				lines = text.split('\n');
 			}
-		
+
 			// 检查CSV头部是否包含必需字段
 			const header = lines[0].split(',');
 			const tlsIndex = header.indexOf('TLS');
-			
+
 			const ipAddressIndex = 0;// IP地址在 CSV 头部的位置
 			const portIndex = 1;// 端口在 CSV 头部的位置
 			const dataCenterIndex = tlsIndex + remarkIndex; // 数据中心是 TLS 的后一个字段
-		
+
 			if (tlsIndex === -1) {
 				console.error('CSV文件缺少必需的字段');
 				continue;
 			}
-		
+
 			// 从第二行开始遍历CSV行
 			for (let i = 1; i < lines.length; i++) {
 				const columns = lines[i].split(',');
@@ -1377,7 +1385,7 @@ async function getAddressescsv(tls) {
 					const ipAddress = columns[ipAddressIndex];
 					const port = columns[portIndex];
 					const dataCenter = columns[dataCenterIndex];
-			
+
 					const formattedAddress = `${ipAddress}:${port}#${dataCenter}`;
 					newAddressescsv.push(formattedAddress);
 					if (csvUrl.includes('proxyip=true') && columns[tlsIndex].toUpperCase() == 'true' && !httpsPorts.includes(port)) {
@@ -1391,13 +1399,13 @@ async function getAddressescsv(tls) {
 			continue;
 		}
 	}
-	
+
 	return newAddressescsv;
 }
 
 function surge(content, url) {
 	let 每行内容;
-	if (content.includes('\r\n')){
+	if (content.includes('\r\n')) {
 		每行内容 = content.split('\r\n');
 	} else {
 		每行内容 = content.split('\n');
@@ -1498,9 +1506,9 @@ function sha224(输入字符串) {
 			}
 
 			for (let j = 16; j < 64; j++) {
-				const s0 = 右旋转(w[j-15], 7) ^ 右旋转(w[j-15], 18) ^ (w[j-15] >>> 3);
-				const s1 = 右旋转(w[j-2], 17) ^ 右旋转(w[j-2], 19) ^ (w[j-2] >>> 10);
-				w[j] = (w[j-16] + s0 + w[j-7] + s1) >>> 0;
+				const s0 = 右旋转(w[j - 15], 7) ^ 右旋转(w[j - 15], 18) ^ (w[j - 15] >>> 3);
+				const s1 = 右旋转(w[j - 2], 17) ^ 右旋转(w[j - 2], 19) ^ (w[j - 2] >>> 10);
+				w[j] = (w[j - 16] + s0 + w[j - 7] + s1) >>> 0;
 			}
 
 			let [a, b, c, d, e, f, g, h0] = 哈希值;
@@ -1544,13 +1552,13 @@ function sha224(输入字符串) {
 	// 主函数逻辑
 	const 编码输入 = utf8编码(输入字符串);
 	const 哈希结果 = sha224核心(编码输入);
-	
+
 	// 转换为十六进制字符串
 	return 字节转十六进制(
 		哈希结果.flatMap(h => [
-			(h >>> 24) & 0xFF, 
-			(h >>> 16) & 0xFF, 
-			(h >>> 8) & 0xFF, 
+			(h >>> 24) & 0xFF,
+			(h >>> 16) & 0xFF,
+			(h >>> 8) & 0xFF,
 			h & 0xFF
 		])
 	);
@@ -1559,7 +1567,7 @@ function sha224(输入字符串) {
 async function 迁移地址列表(env, txt = 'ADD.txt') {
 	const 旧数据 = await env.KV.get(`/${txt}`);
 	const 新数据 = await env.KV.get(txt);
-	
+
 	if (旧数据 && !新数据) {
 		// 写入新位置
 		await env.KV.put(txt, 旧数据);
@@ -1584,11 +1592,11 @@ async function KV(request, env, txt = 'ADD.txt') {
 				return new Response("保存失败: " + error.message, { status: 500 });
 			}
 		}
-		
+
 		// GET请求部分
 		let content = '';
 		let hasKV = !!env.KV;
-		
+
 		if (hasKV) {
 			try {
 				content = await env.KV.get(txt) || '';
@@ -1597,7 +1605,7 @@ async function KV(request, env, txt = 'ADD.txt') {
 				content = '读取数据时发生错误: ' + error.message;
 			}
 		}
-		
+
 		const html = `
 			<!DOCTYPE html>
 			<html>
@@ -1672,7 +1680,7 @@ async function KV(request, env, txt = 'ADD.txt') {
 				---------------------------------------------------------------<br>
 				&nbsp;&nbsp;<strong><a href="javascript:void(0);" id="noticeToggle" onclick="toggleNotice()">注意事项∨</a></strong><br>
 				<div id="noticeContent" class="notice-content">
-					${decodeURIComponent(atob('JTA5JTA5JTA5JTA5JTA5JTNDc3Ryb25nJTNFMS4lM0MlMkZzdHJvbmclM0UlMjBBRERBUEklMjAlRTUlQTYlODIlRTYlOUUlOUMlRTYlOTglQUYlRTUlOEYlOEQlRTQlQkIlQTNJUCVFRiVCQyU4QyVFNSU4RiVBRiVFNCVCRCU5QyVFNCVCOCVCQVBST1hZSVAlRTclOUElODQlRTglQUYlOUQlRUYlQkMlOEMlRTUlOEYlQUYlRTUlQjAlODYlMjIlM0Zwcm94eWlwJTNEdHJ1ZSUyMiVFNSU4RiU4MiVFNiU5NSVCMCVFNiVCNyVCQiVFNSU4QSVBMCVFNSU4OCVCMCVFOSU5MyVCRSVFNiU4RSVBNSVFNiU5QyVBQiVFNSVCMCVCRSVFRiVCQyU4QyVFNCVCRSU4QiVFNSVBNiU4MiVFRiVCQyU5QSUzQ2JyJTNFCiUwOSUwOSUwOSUwOSUwOSUyNm5ic3AlM0IlMjZuYnNwJTNCaHR0cHMlM0ElMkYlMkZyYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tJTJGY21saXUlMkZXb3JrZXJWbGVzczJzdWIlMkZtYWluJTJGYWRkcmVzc2VzYXBpLnR4dCUzQ3N0cm9uZyUzRSUzRnByb3h5aXAlM0R0cnVlJTNDJTJGc3Ryb25nJTNFJTNDYnIlM0UlM0NiciUzRQolMDklMDklMDklMDklMDklM0NzdHJvbmclM0UyLiUzQyUyRnN0cm9uZyUzRSUyMEFEREFQSSUyMCVFNSVBNiU4MiVFNiU5RSU5QyVFNiU5OCVBRiUyMCUzQ2ElMjBocmVmJTNEJTI3aHR0cHMlM0ElMkYlMkZnaXRodWIuY29tJTJGWElVMiUyRkNsb3VkZmxhcmVTcGVlZFRlc3QlMjclM0VDbG91ZGZsYXJlU3BlZWRUZXN0JTNDJTJGYSUzRSUyMCVFNyU5QSU4NCUyMGNzdiUyMCVFNyVCQiU5MyVFNiU5RSU5QyVFNiU5NiU4NyVFNCVCQiVCNiVFRiVCQyU4QyVFNCVCRSU4QiVFNSVBNiU4MiVFRiVCQyU5QSUzQ2JyJTNFCiUwOSUwOSUwOSUwOSUwOSUyNm5ic3AlM0IlMjZuYnNwJTNCaHR0cHMlM0ElMkYlMkZyYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tJTJGY21saXUlMkZXb3JrZXJWbGVzczJzdWIlMkZyZWZzJTJGaGVhZHMlMkZtYWluJTJGQ2xvdWRmbGFyZVNwZWVkVGVzdC5jc3YlM0NiciUzRSUzQ2JyJTNFCiUwOSUwOSUwOSUwOSUwOSUyNm5ic3AlM0IlMjZuYnNwJTNCLSUyMCVFNSVBNiU4MiVFOSU5QyU4MCVFNiU4QyU4NyVFNSVBRSU5QTIwNTMlRTclQUIlQUYlRTUlOEYlQTMlRTUlOEYlQUYlRTUlQjAlODYlMjIlM0Zwb3J0JTNEMjA1MyUyMiVFNSU4RiU4MiVFNiU5NSVCMCVFNiVCNyVCQiVFNSU4QSVBMCVFNSU4OCVCMCVFOSU5MyVCRSVFNiU4RSVBNSVFNiU5QyVBQiVFNSVCMCVCRSVFRiVCQyU4QyVFNCVCRSU4QiVFNSVBNiU4MiVFRiVCQyU5QSUzQ2JyJTNFCiUwOSUwOSUwOSUwOSUwOSUyNm5ic3AlM0IlMjZuYnNwJTNCaHR0cHMlM0ElMkYlMkZyYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tJTJGY21saXUlMkZXb3JrZXJWbGVzczJzdWIlMkZyZWZzJTJGaGVhZHMlMkZtYWluJTJGQ2xvdWRmbGFyZVNwZWVkVGVzdC5jc3YlM0NzdHJvbmclM0UlM0Zwb3J0JTNEMjA1MyUzQyUyRnN0cm9uZyUzRSUzQ2JyJTNFJTNDYnIlM0UKJTA5JTA5JTA5JTA5JTA5JTI2bmJzcCUzQiUyNm5ic3AlM0ItJTIwJUU1JUE2JTgyJUU5JTlDJTgwJUU2JThDJTg3JUU1JUFFJTlBJUU4JThBJTgyJUU3JTgyJUI5JUU1JUE0JTg3JUU2JUIzJUE4JUU1JThGJUFGJUU1JUIwJTg2JTIyJTNGaWQlM0RDRiVFNCVCQyU5OCVFOSU4MCU4OSUyMiVFNSU4RiU4MiVFNiU5NSVCMCVFNiVCNyVCQiVFNSU4QSVBMCVFNSU4OCVCMCVFOSU5MyVCRSVFNiU4RSVBNSVFNiU5QyVBQiVFNSVCMCVCRSVFRiVCQyU4QyVFNCVCRSU4QiVFNSVBNiU4MiVFRiVCQyU5QSUzQ2JyJTNFCiUwOSUwOSUwOSUwOSUwOSUyNm5ic3AlM0IlMjZuYnNwJTNCaHR0cHMlM0ElMkYlMkZyYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tJTJGY21saXUlMkZXb3JrZXJWbGVzczJzdWIlMkZyZWZzJTJGaGVhZHMlMkZtYWluJTJGQ2xvdWRmbGFyZVNwZWVkVGVzdC5jc3YlM0NzdHJvbmclM0UlM0ZpZCUzRENGJUU0JUJDJTk4JUU5JTgwJTg5JTNDJTJGc3Ryb25nJTNFJTNDYnIlM0UlM0NiciUzRQolMDklMDklMDklMDklMDklMjZuYnNwJTNCJTI2bmJzcCUzQi0lMjAlRTUlQTYlODIlRTklOUMlODAlRTYlOEMlODclRTUlQUUlOUElRTUlQTQlOUElRTQlQjglQUElRTUlOEYlODIlRTYlOTUlQjAlRTUlODglOTklRTklOUMlODAlRTglQTYlODElRTQlQkQlQkYlRTclOTQlQTglMjclMjYlMjclRTUlODElOUElRTklOTclQjQlRTklOUElOTQlRUYlQkMlOEMlRTQlQkUlOEIlRTUlQTYlODIlRUYlQkMlOUElM0NiciUzRQolMDklMDklMDklMDklMDklMjZuYnNwJTNCJTI2bmJzcCUzQmh0dHBzJTNBJTJGJTJGcmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSUyRmNtbGl1JTJGV29ya2VyVmxlc3Myc3ViJTJGcmVmcyUyRmhlYWRzJTJGbWFpbiUyRkNsb3VkZmxhcmVTcGVlZFRlc3QuY3N2JTNGaWQlM0RDRiVFNCVCQyU5OCVFOSU4MCU4OSUzQ3N0cm9uZyUzRSUyNiUzQyUyRnN0cm9uZyUzRXBvcnQlM0QyMDUzJTNDYnIlM0U='))}
+					${decodeURIComponent(atob('JTA5JTA5JTA5JTA5JTA5JTNDc3Ryb25nJTNFMS4lM0MlMkZzdHJvbmclM0UlMjBBRERBUEklMjAlRTUlQTYlODIlRTYlOUUlOUMlRTYlOTglQUYlRTUlOEYlOEQlRTQlQkIlQTNJUCVFRiVCQyU4QyVFNSU4RiVBRiVFNCVCRCU5QyVFNCVCOCVCQVBST1hZSVAlRTclOUElODQlRTglQUYlOUQlRUYlQkMlOEMlRTUlOEYlQUYlRTUlQjAlODYlMjIlM0Zwcm94eWlwJTNEdHJ1ZSUyMiVFNSU4RiU4MiVFNiU5NSVCMCVFNiVCNyVCQiVFNSU4QSVBMCVFNSU4OCVCMCVFOSU5MyVCRSVFNiU4RSVBNSVFNiU5QyVBQiVFNSVCMCVCRSVFRiVCQyU4QyVFNCVCRSU4QiVFNSVBNiU4MiVFRiVCQyU5QSUzQ2JyJTNFCiUwOSUwOSUwOSUwOSUwOSUyNm5ic3AlM0IlMjZuYnNwJTNCaHR0cHMlM0ElMkYlMkZyYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tJTJGY21saXUlMkZXb3JrZXJWbGVzczJzdWIlMkZtYWluJTJGYWRkcmVzc2VzYXBpLnR4dCUzQ3N0cm9uZyUzRSUzRnByb3h5aXAlM0R0cnVlJTNDJTJGc3Ryb25nJTNFJTNDYnIlM0UlM0NiciUzRQolMDklMDklMDklMDklMDklM0NzdHJvbmclM0UyLiUzQyUyRnN0cm9uZyUzRSUyMEFEREFQSSUyMCVFNSVBNiU4MiVFNiU5RSU5QyVFNiU5OCVBRiUyMCUzQ2ElMjBocmVmJTNEJTI3aHR0cHMlM0ElMkYlMkZnaXRodWIuY29tJTJGWElVMiUyRkNsb3VkZmxhcmVTcGVlZFRlc3QlMjclM0VDbG91ZGZsYXJlU3BlZWRUZXN0JTNDJTJGYSUzRSUyMCVFNyU5QSU4NCUyMGNzdiUyMCVFNyVCQiU5MyVFNiU5RSU5QyVFNiU5NiU4NyVFNCVCQiVCNiVFRiVCQyU4QyVFNCVCRSU4QiVFNSVBNiU4MiVFRiVCQyU5QSUzQ2JyJTNFCiUwOSUwOSUwOSUwOSUwOSUyNm5ic3AlM0IlMjZuYnNwJTNCaHR0cHMlM0ElMkYlMkZyYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tJTJGY21saXUlMkZXb3JrZXJWbGVzczJzdWIlMkZtYWluJTJGQ2xvdWRmbGFyZVNwZWVkVGVzdC5jc3YlM0NiciUzRSUzQ2JyJTNFCiUwOSUwOSUwOSUwOSUwOSUyNm5ic3AlM0IlMjZuYnNwJTNCLSUyMCVFNSVBNiU4MiVFOSU5QyU4MCVFNiU4QyU4NyVFNSVBRSU5QTIwNTMlRTclQUIlQUYlRTUlOEYlQTMlRTUlOEYlQUYlRTUlQjAlODYlMjIlM0Zwb3J0JTNEMjA1MyUyMiVFNSU4RiU4MiVFNiU5NSVCMCVFNiVCNyVCQiVFNSU4QSVBMCVFNSU4OCVCMCVFOSU5MyVCRSVFNiU4RSVBNSVFNiU5QyVBQiVFNSVCMCVCRSVFRiVCQyU4QyVFNCVCRSU4QiVFNSVBNiU4MiVFRiVCQyU5QSUzQ2JyJTNFCiUwOSUwOSUwOSUwOSUwOSUyNm5ic3AlM0IlMjZuYnNwJTNCaHR0cHMlM0ElMkYlMkZyYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tJTJGY21saXUlMkZXb3JrZXJWbGVzczJzdWIlMkZtYWluJTJGQ2xvdWRmbGFyZVNwZWVkVGVzdC5jc3YlM0NzdHJvbmclM0UlM0Zwb3J0JTNEMjA1MyUzQyUyRnN0cm9uZyUzRSUzQ2JyJTNFJTNDYnIlM0UKJTA5JTA5JTA5JTA5JTA5JTI2bmJzcCUzQiUyNm5ic3AlM0ItJTIwJUU1JUE2JTgyJUU5JTlDJTgwJUU2JThDJTg3JUU1JUFFJTlBJUU4JThBJTgyJUU3JTgyJUI5JUU1JUE0JTg3JUU2JUIzJUE4JUU1JThGJUFGJUU1JUIwJTg2JTIyJTNGaWQlM0RDRiVFNCVCQyU5OCVFOSU4MCU4OSUyMiVFNSU4RiU4MiVFNiU5NSVCMCVFNiVCNyVCQiVFNSU4QSVBMCVFNSU4OCVCMCVFOSU5MyVCRSVFNiU4RSVBNSVFNiU5QyVBQiVFNSVCMCVCRSVFRiVCQyU4QyVFNCVCRSU4QiVFNSVBNiU4MiVFRiVCQyU5QSUzQ2JyJTNFCiUwOSUwOSUwOSUwOSUwOSUyNm5ic3AlM0IlMjZuYnNwJTNCaHR0cHMlM0ElMkYlMkZyYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tJTJGY21saXUlMkZXb3JrZXJWbGVzczJzdWIlMkZtYWluJTJGQ2xvdWRmbGFyZVNwZWVkVGVzdC5jc3YlM0NzdHJvbmclM0UlM0ZpZCUzRENGJUU0JUJDJTk4JUU5JTgwJTg5JTNDJTJGc3Ryb25nJTNFJTNDYnIlM0UlM0NiciUzRQolMDklMDklMDklMDklMDklMjZuYnNwJTNCJTI2bmJzcCUzQi0lMjAlRTUlQTYlODIlRTklOUMlODAlRTYlOEMlODclRTUlQUUlOUElRTUlQTQlOUElRTQlQjglQUElRTUlOEYlODIlRTYlOTUlQjAlRTUlODglOTklRTklOUMlODAlRTglQTYlODElRTQlQkQlQkYlRTclOTQlQTglMjclMjYlMjclRTUlODElOUElRTklOTclQjQlRTklOUElOTQlRUYlQkMlOEMlRTQlQkUlOEIlRTUlQTYlODIlRUYlQkMlOUElM0NiciUzRQolMDklMDklMDklMDklMDklMjZuYnNwJTNCJTI2bmJzcCUzQmh0dHBzJTNBJTJGJTJGcmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSUyRmNtbGl1JTJGV29ya2VyVmxlc3Myc3ViJTJGbWFpbiUyRkNsb3VkZmxhcmVTcGVlZFRlc3QuY3N2JTNGaWQlM0RDRiVFNCVCQyU5OCVFOSU4MCU4OSUzQ3N0cm9uZyUzRSUyNiUzQyUyRnN0cm9uZyUzRXBvcnQlM0QyMDUzJTNDYnIlM0U='))}
 				</div>
 				<div class="editor-container">
 					${hasKV ? `
@@ -1821,13 +1829,13 @@ async function KV(request, env, txt = 'ADD.txt') {
 			</body>
 			</html>
 		`;
-		
+
 		return new Response(html, {
 			headers: { "Content-Type": "text/html;charset=utf-8" }
 		});
 	} catch (error) {
 		console.error('处理请求时发生错误:', error);
-		return new Response("服务器错误: " + error.message, { 
+		return new Response("服务器错误: " + error.message, {
 			status: 500,
 			headers: { "Content-Type": "text/plain;charset=utf-8" }
 		});
