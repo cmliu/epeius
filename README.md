@@ -1,3 +1,12 @@
+**文件说明：**  
+1. 每天凌晨 3 点（北京时间 UTC+8）自动构建
+2. **`cmliu-cfbestip.txt`** 源采用 <https://cf.090227.xyz>
+3. **`cfspeeddns-cfbestip.txt`** 源采用 <https://ip.164746.xyz>
+4. **`wetest-cfbestip.txt`** 源采用 <https://www.wetest.vip/page/cloudflare/address_v4.html> 和 <https://www.wetest.vip/page/cloudflare/address_v6.html> 组合
+
+<details>
+<summary>原 README</summary>
+
 # 🚀 epeius
 这是一个基于 CF Worker 平台的脚本，在原版的基础上修改了显示 Trojan 配置信息转换为订阅内容。使用该脚本，你可以方便地将 Trojan 配置信息使用在线配置转换到 Clash 或 Singbox 等工具中。
 
@@ -278,3 +287,4 @@ Telegram交流群：[@CMLiussss](https://t.me/CMLiussss)
 - [emn178](https://github.com/emn178/js-sha256)
 - [ACL4SSR](https://github.com/ACL4SSR/ACL4SSR/tree/master/Clash/config)
 - [SHIJS1999](https://github.com/SHIJS1999/cloudflare-worker-vless-ip)
+</details>

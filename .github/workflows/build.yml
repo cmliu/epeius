@@ -1,0 +1,48 @@
+name: Build CFBestIP
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 19 * * *"
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "*.js"
+      - "*.md"
+      - "*.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone Repository
+        uses: actions/checkout@main
+
+      - name: Download cfbestip
+        run: |
+          echo "update_version=$(date -d '+8 hours' +%Y-%m-%d)" >> ${GITHUB_ENV}
+          mkdir -p ./CFBestIP/
+          curl -sSL https://cf.090227.xyz | grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}' | head -n 20 | awk '{print $0 "#CMLiu 优选 IP " NR}' > ./CFBestIP/cmliu-cfbestip.txt
+          curl -sSL https://ip.164746.xyz | grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}' | awk '{print $0 "#CFSpeedDNS 优选 IP " NR}' > ./CFBestIP/cfspeeddns-cfbestip.txt
+          curl -sSL https://www.wetest.vip/page/cloudflare/address_v4.html | grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}' | awk '{print $0 "#微测网优选 IPv4 " NR}' > ./CFBestIP/wetest-cfbestip.txt
+          curl -sSL https://www.wetest.vip/page/cloudflare/address_v6.html | grep -Eio '([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|(([0-9a-fA-F]{1,4}:)*([0-9a-fA-F]{1,4})?::([0-9a-fA-F]{1,4}:)*([0-9a-fA-F]{1,4})?)' | awk '{print "[" $0 "]"}' | awk '{print $0 "#微测网优选 IPv6 " NR}' >> ./CFBestIP/wetest-cfbestip.txt
+          rm -rf ./tmp/
+
+      - name: Release and upload `CFBestIP` assets
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          release_name: CFBestIP
+          tag: CFBestIP
+          overwrite: true
+          body: CFBestIP 文件更新于 ${{ env.update_version }}
+          file_glob: true
+          file: ./CFBestIP/*
+
+      - name: Delete old workflow runs
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          retain_days: 3
+          keep_minimum_runs: 1
