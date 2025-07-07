@@ -142,7 +142,7 @@ export default {
                 if (!SCV || SCV == '0' || SCV == 'false') allowInsecure = '';
                 else SCV = 'true';
                 const url302 = env.URL302 || env.url302 || URL302
-			    const murl = env.url || env.URL || MURL
+		const murl = env.url || env.URL || MURL
                 switch (url.pathname) {
                     case '/':
                         if (url302 !== '') return Response.redirect(url302, 302);
