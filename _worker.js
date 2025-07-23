@@ -168,7 +168,7 @@ export default {
                         let workersSum = UD;
                         let total = 24 * 1099511627776;
                         if (env.CF_EMAIL && env.CF_APIKEY) {
-                            const usage = await getUsage(env.CF_ID, env.CF_EMAIL, env.CF_APIKEY, env.CF_ALL);
+                            const usage = await getUsage(env.CF_ID, env.CF_EMAIL, env.CF_APIKEY, env.CF_APITOKEN, env.CF_ALL);
                             pagesSum = usage[1];
                             workersSum = usage[2];
                             total = env.CF_ALL ? Number(env.CF_ALL) : (1024 * 100); // 100K
@@ -1015,7 +1015,7 @@ async function get特洛伊Config(password, hostName, sub, UA, RproxyIP, _url, f
             } else {
                 const response = await fetch(url, {
                     headers: {
-                        'User-Agent': atob('Q0YtV29ya2Vycy1lcGVpdXMvY21saXU='),
+                        'User-Agent': (isBase64 ? 'v2rayN' : UA) + atob('Q0YtV29ya2Vycy1lcGVpdXMvY21saXU='),
                     }
                 });
                 content = await response.text();
@@ -3662,10 +3662,11 @@ async function bestIP(request, env, txt = 'ADD.txt') {
  * @param {string} accountId - 账户ID（可选，如果没有会自动获取）
  * @param {string} email - Cloudflare 账户邮箱
  * @param {string} apikey - Cloudflare API 密钥
+ * @param {string} apitoken - Cloudflare API 令牌
  * @param {number} all - 总限额，默认10万次
  * @returns {Array} [总限额, Pages请求数, Workers请求数, 总请求数]
  */
-async function getUsage(accountId, email, apikey, all = 100000) {
+async function getUsage(accountId, email, apikey, apitoken, all = 100000) {
     /**
      * 获取 Cloudflare 账户ID
      * @param {string} email - 账户邮箱
@@ -3756,15 +3757,26 @@ async function getUsage(accountId, email, apikey, all = 100000) {
         const startDate = now.toISOString(); // 开始时间：今天0点
 
         console.log(`查询时间范围: ${startDate} 到 ${endDate}`);
+        // 准备请求头
+        let headers = {}
+        if (apikey) {
+            headers = {
+                "Content-Type": "application/json",
+                "X-AUTH-EMAIL": email,
+                "X-AUTH-KEY": apikey,
+            };
+        }
+        if (apitoken) {
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${apitoken}`,
+            }
+        }
 
         // 向 Cloudflare GraphQL API 发送请求，获取今日使用量
         const response = await fetch("https://api.cloudflare.com/client/v4/graphql", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-AUTH-EMAIL": email,
-                "X-AUTH-KEY": apikey,
-            },
+            headers: headers,
             body: JSON.stringify({
                 // GraphQL 查询语句：获取 Pages 和 Workers 的请求数统计
                 query: `query getBillingMetrics($accountId: String!, $filter: AccountWorkersInvocationsAdaptiveFilter_InputObject) {
