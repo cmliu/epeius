@@ -167,7 +167,7 @@ export default {
                         let pagesSum = UD;
                         let workersSum = UD;
                         let total = 24 * 1099511627776;
-                        if (env.CF_EMAIL && env.CF_APIKEY) {
+                        if ((env.CF_EMAIL && env.CF_APIKEY) || (env.CF_ID && env.CF_APITOKEN)) {
                             const usage = await getUsage(env.CF_ID, env.CF_EMAIL, env.CF_APIKEY, env.CF_APITOKEN, env.CF_ALL);
                             pagesSum = usage[1];
                             workersSum = usage[2];
@@ -2076,7 +2076,7 @@ async function resolveToIPv6(target) {
 
     // 获取域名的IPv4地址
     async function fetchIPv4(domain) {
-        const url = `https://cloudflare-dns.com/dns-query?name=${domain}&type=A`;
+        const url = `https://1.1.1.1/dns-query?name=${domain}&type=A`;
         const response = await fetch(url, {
             headers: { 'Accept': 'application/dns-json' }
         });
