@@ -76,7 +76,7 @@ export default {
             proxyIP = env.PROXYIP || env.proxyip || proxyIP;
             proxyIPs = await ADD(proxyIP);
             proxyIP = proxyIPs[Math.floor(Math.random() * proxyIPs.length)];
-            DNS64Server = env.DNS64 || env.NAT64 || (DNS64Server != '' ? DNS64Server : atob("ZG5zNjQuY21saXVzc3NzLm5ldA=="));
+            DNS64Server = env.DNS64 || env.NAT64 || DNS64Server;
             socks5Address = env.HTTP || env.SOCKS5 || socks5Address;
             socks5s = await ADD(socks5Address);
             socks5Address = socks5s[Math.floor(Math.random() * socks5s.length)];
@@ -2060,6 +2060,29 @@ async function KV(request, env, txt = 'ADD.txt') {
 }
 
 async function resolveToIPv6(target) {
+    if (!DNS64Server) {
+        const defaultAddress = atob('cHJveHlpcC5jbWxpdXNzc3MubmV0');
+        try {
+            const response = await fetch(atob('aHR0cHM6Ly8xLjEuMS4xL2Rucy1xdWVyeT9uYW1lPW5hdDY0LmNtbGl1c3Nzcy5uZXQmdHlwZT1UWFQ='), {
+                headers: { 'Accept': 'application/dns-json' }
+            });
+
+            if (!response.ok) return defaultAddress;
+            const data = await response.json();
+            const txtRecords = (data.Answer || []).filter(record => record.type === 16).map(record => record.data);
+
+            if (txtRecords.length === 0) return defaultAddress;
+            let txtData = txtRecords[0];
+            if (txtData.startsWith('"') && txtData.endsWith('"')) txtData = txtData.slice(1, -1);
+            const prefixes = txtData.replace(/\\010/g, '\n').split('\n').filter(prefix => prefix.trim());
+            if (prefixes.length === 0) return defaultAddress;
+            DNS64Server = prefixes[Math.floor(Math.random() * prefixes.length)];
+        } catch (error) {
+            console.error('DNS64Server查询失败:', error);
+            return defaultAddress;
+        }
+    }
+
     // 检查是否为IPv4
     function isIPv4(str) {
         const parts = str.split('.');
@@ -2252,7 +2275,7 @@ async function resolveToIPv6(target) {
         return isIPv6(nat64) ? nat64 : atob('cHJveHlpcC5jbWxpdXNzc3MubmV0');
     } catch (error) {
         console.error('解析错误:', error);
-        return atob('cHJveHlpcC5jbWxpdXNzc3MubmV0');;
+        return atob('cHJveHlpcC5jbWxpdXNzc3MubmV0');
     }
 }
 
