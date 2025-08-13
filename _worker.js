@@ -440,7 +440,7 @@ async function handleTCPOutBound(remoteSocket, addressRemote, portRemote, rawCli
         if (!useSocks) {
             const nat64Proxyip = `[${await resolveToIPv6(addressRemote)}]`;
             log(`NAT64 代理连接到 ${nat64Proxyip}:443`);
-            tcpSocket = await connectAndWrite(nat64Proxyip, '443');
+            tcpSocket = await connectAndWrite(nat64Proxyip, 443);
         }
         tcpSocket.closed.catch(error => {
             console.log('retry tcpSocket closed error', error);
@@ -734,28 +734,17 @@ async function get特洛伊Config(password, hostName, sub, UA, RproxyIP, _url, f
 
         if ((addresses.length + addressesapi.length + addressescsv.length) == 0) {
             // 定义 Cloudflare IP 范围的 CIDR 列表
-            let cfips = [
-                '103.21.244.0/24',
-                '104.16.0.0/13',
-                '104.24.0.0/14',
-                '172.64.0.0/14',
-                '104.16.0.0/14',
-                '104.24.0.0/15',
-                '141.101.64.0/19',
-                '172.64.0.0/14',
-                '188.114.96.0/21',
-                '190.93.240.0/21',
-                '162.159.152.0/23',
-                '104.16.0.0/13',
-                '104.24.0.0/14',
-                '172.64.0.0/14',
-                '104.16.0.0/14',
-                '104.24.0.0/15',
-                '141.101.64.0/19',
-                '172.64.0.0/14',
-                '188.114.96.0/21',
-                '190.93.240.0/21',
-            ];
+            let cfips = ['104.16.0.0/13'];
+            // 请求 Cloudflare CIDR 列表
+            try {
+                const response = await fetch('https://raw.githubusercontent.com/cmliu/cmliu/main/CF-CIDR.txt');
+                if (response.ok) {
+                    const data = await response.text();
+                    cfips = await ADD(data);
+                }
+            } catch (error) {
+                console.log('获取 CF-CIDR 失败，使用默认值:', error);
+            }
 
             // 生成符合给定 CIDR 范围的随机 IP 地址
             function generateRandomIPFromCIDR(cidr) {
@@ -2060,8 +2049,8 @@ async function KV(request, env, txt = 'ADD.txt') {
 }
 
 async function resolveToIPv6(target) {
+    const defaultAddress = atob('cHJveHlpcC5jbWxpdXNzc3MubmV0');
     if (!DNS64Server) {
-        const defaultAddress = atob('cHJveHlpcC5jbWxpdXNzc3MubmV0');
         try {
             const response = await fetch(atob('aHR0cHM6Ly8xLjEuMS4xL2Rucy1xdWVyeT9uYW1lPW5hdDY0LmNtbGl1c3Nzcy5uZXQmdHlwZT1UWFQ='), {
                 headers: { 'Accept': 'application/dns-json' }
@@ -2272,10 +2261,10 @@ async function resolveToIPv6(target) {
         if (isIPv6(target)) return target; // IPv6直接返回
         const ipv4 = isIPv4(target) ? target : await fetchIPv4(target);
         const nat64 = DNS64Server.endsWith('/96') ? convertToNAT64IPv6(ipv4) : await queryNAT64(ipv4 + atob('LmlwLjA5MDIyNy54eXo='));
-        return isIPv6(nat64) ? nat64 : atob('cHJveHlpcC5jbWxpdXNzc3MubmV0');
+        return isIPv6(nat64) ? nat64 : defaultAddress;
     } catch (error) {
         console.error('解析错误:', error);
-        return atob('cHJveHlpcC5jbWxpdXNzc3MubmV0');
+        return defaultAddress;
     }
 }
 
