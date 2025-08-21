@@ -278,9 +278,6 @@ Telegram交流群：[@CMLiussss](https://t.me/CMLiussss)
 
 
 # 🙏 特别鸣谢
-### 💖 赞助支持 - 提供云服务器维持[订阅转换服务](https://sub.cmliussss.net/)
-- [Alice Networks LTD](https://url.cmliussss.com/alice)
-- [VTEXS Enterprise Cloud](https://console.vtexs.com/?affid=1532)
 ### 🛠 开源代码引用
 - [ca110us](https://github.com/ca110us/epeius)
 - [xream](https://github.com/xream)

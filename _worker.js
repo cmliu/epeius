@@ -627,7 +627,7 @@ async function MD5MD5(text) {
 async function ADD(内容) {
     // 将制表符、双引号、单引号和换行符都替换为逗号
     // 然后将连续的多个逗号替换为单个逗号
-    var 替换后的内容 = 内容.replace(/[	|"'\r\n]+/g, ',').replace(/,+/g, ',');
+    var 替换后的内容 = 内容.replace(/[	"'\r\n]+/g, ',').replace(/,+/g, ',');
 
     // 删除开头和结尾的逗号（如果有的话）
     if (替换后的内容.charAt(0) == ',') 替换后的内容 = 替换后的内容.slice(1);
@@ -688,7 +688,7 @@ function 配置信息(密码, 域名地址) {
     const SNI = 域名地址;
     const 指纹 = 'randomized';
 
-    const v2ray = `${协议类型}://${encodeURIComponent(密码)}@${地址}:${端口}?security=${传输层安全[0]}&sni=${SNI}&alpn=h3&fp=${指纹}&type=${传输层协议}&host=${伪装域名}&path=${encodeURIComponent(路径) + allowInsecure}&fragment=1,40-60,30-50,tlshello#${encodeURIComponent(别名)}`
+    const v2ray = `${协议类型}://${encodeURIComponent(密码)}@${地址}:${端口}?security=${传输层安全[0]}&sni=${SNI}&alpn=h3&fp=${指纹}&type=${传输层协议}&host=${伪装域名}&path=${encodeURIComponent(路径) + allowInsecure}&fragment=${encodeURIComponent('1,40-60,30-50,tlshello')}#${encodeURIComponent(别名)}`
     const clash = `- {name: ${别名}, server: ${地址}, port: ${端口}, udp: false, client-fingerprint: ${指纹}, type: ${协议类型}, password: ${密码}, sni: ${SNI}, alpn: [h3], skip-cert-verify: ${SCV}, network: ${传输层协议}, ws-opts: {path: "${路径}", headers: {Host: ${伪装域名}}}}`;
 
     return [v2ray, clash];
@@ -1423,19 +1423,19 @@ function subAddresses(host, pw, userAgent, newAddressesapi, newAddressescsv) {
         let 节点备注 = '';
         const matchingProxyIP = proxyIPPool.find(proxyIP => proxyIP.includes(address));
         if (matchingProxyIP) 最终路径 = `/proxyip=${matchingProxyIP}`;
-
+        /*
         if (proxyhosts.length > 0 && (伪装域名.includes('.workers.dev'))) {
             最终路径 = `/${伪装域名}${最终路径}`;
             伪装域名 = proxyhosts[Math.floor(Math.random() * proxyhosts.length)];
             节点备注 = ` 已启用临时域名中转服务，请尽快绑定自定义域！`;
         }
-
+        */
         let 密码 = pw;
         if (!userAgent.includes('subconverter')) 密码 = encodeURIComponent(pw);
 
         const 啥啥啥_写的这是啥啊 = 'dHJvamFu';
         const 协议类型 = atob(啥啥啥_写的这是啥啊);
-        const 特洛伊Link = `${协议类型}://${密码}@${address}:${port}?security=tls&sni=${伪装域名}&fp=randomized&type=ws&host=${伪装域名}&path=${encodeURIComponent(最终路径) + allowInsecure}&fragment=1,40-60,30-50,tlshello#${encodeURIComponent(addressid + 节点备注)}`;
+        const 特洛伊Link = `${协议类型}://${密码}@${address}:${port}?security=tls&sni=${伪装域名}&fp=randomized&type=ws&host=${伪装域名}&path=${encodeURIComponent(最终路径) + allowInsecure}&fragment=${encodeURIComponent('1,40-60,30-50,tlshello')}#${encodeURIComponent(addressid + 节点备注)}`;
 
         return 特洛伊Link;
     }).join('\n');
