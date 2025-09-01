@@ -278,6 +278,13 @@ Telegram交流群：[@CMLiussss](https://t.me/CMLiussss)
 
 
 # 🙏 特别鸣谢
+
+<a href="https://vps.town/aff/GBFTFIJD">
+  <img src="https://vps.town/static/images/sponsor.png" alt="vps.town">
+</a>
+
+本项目的[订阅转换](https://sub.cmliussss.com/)后端由 VPS.Town 提供支持
+
 ### 🛠 开源代码引用
 - [ca110us](https://github.com/ca110us/epeius)
 - [xream](https://github.com/xream)
