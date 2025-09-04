@@ -1,5 +1,6 @@
-name = "vl0901"
+name = "t0903"
 main = "_worker.js"
-compatibility_date = "2025-08-07"
+compatibility_date = "2025-09-03"
 
 keep_vars = true
+
