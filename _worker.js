@@ -981,30 +981,30 @@ async function get特洛伊Config(password, hostName, sub, UA, RproxyIP, _url, f
             url = `https://${hostName}/${fakeUserID + _url.search}`;
         }
 
-        if (!userAgent.includes(('CF-Workers-SUB').toLowerCase()) && !_url.searchParams.has('b64') && !_url.searchParams.has('base64')) {
-            if ((userAgent.includes('clash') && !userAgent.includes('nekobox')) || (_url.searchParams.has('clash'))) {
-                url = `${subProtocol}://${subConverter}/sub?target=clash&url=${encodeURIComponent(url)}&insert=false&config=${encodeURIComponent(subConfig)}&emoji=${subEmoji}&list=false&tfo=false&scv=${SCV}&fdn=false&sort=false&new_name=true`;
-                isBase64 = false;
-            } else if (userAgent.includes('sing-box') || userAgent.includes('singbox') || _url.searchParams.has('singbox') || _url.searchParams.has('sb')) {
-                url = `${subProtocol}://${subConverter}/sub?target=singbox&url=${encodeURIComponent(url)}&insert=false&config=${encodeURIComponent(subConfig)}&emoji=${subEmoji}&list=false&tfo=false&scv=${SCV}&fdn=false&sort=false&new_name=true`;
-                isBase64 = false;
-            } else if (userAgent.includes('surge') || _url.searchParams.has('surge')) {
-                url = `${subProtocol}://${subConverter}/sub?target=surge&ver=4&url=${encodeURIComponent(url)}&insert=false&config=${encodeURIComponent(subConfig)}&emoji=${subEmoji}&list=false&xudp=false&udp=false&tfo=false&expand=true&scv=${SCV}&fdn=false`;
-                isBase64 = false;
-            } else if (userAgent.includes('loon') || _url.searchParams.has('loon')) {
-                url = `${subProtocol}://${subConverter}/sub?target=loon&url=${encodeURIComponent(url)}&insert=false&config=${encodeURIComponent(subConfig)}&emoji=${subEmoji}&list=false&tfo=false&scv=${SCV}&fdn=false&sort=false&new_name=true`;
-                isBase64 = false;
-            }
+        if (userAgent.includes(('CF-Workers-SUB').toLowerCase()) || _url.searchParams.has('b64') || _url.searchParams.has('base64') || userAgent.includes('subconverter')) {
+            isBase64 = true;
+        } else if ((userAgent.includes('clash') && !userAgent.includes('nekobox')) || (_url.searchParams.has('clash'))) {
+            url = `${subProtocol}://${subConverter}/sub?target=clash&url=${encodeURIComponent(url)}&insert=false&config=${encodeURIComponent(subConfig)}&emoji=${subEmoji}&list=false&tfo=false&scv=${SCV}&fdn=false&sort=false&new_name=true`;
+            isBase64 = false;
+        } else if (userAgent.includes('sing-box') || userAgent.includes('singbox') || _url.searchParams.has('singbox') || _url.searchParams.has('sb')) {
+            url = `${subProtocol}://${subConverter}/sub?target=singbox&url=${encodeURIComponent(url)}&insert=false&config=${encodeURIComponent(subConfig)}&emoji=${subEmoji}&list=false&tfo=false&scv=${SCV}&fdn=false&sort=false&new_name=true`;
+            isBase64 = false;
+        } else if (userAgent.includes('surge') || _url.searchParams.has('surge')) {
+            url = `${subProtocol}://${subConverter}/sub?target=surge&ver=4&url=${encodeURIComponent(url)}&insert=false&config=${encodeURIComponent(subConfig)}&emoji=${subEmoji}&list=false&xudp=false&udp=false&tfo=false&expand=true&scv=${SCV}&fdn=false`;
+            isBase64 = false;
+        } else if (userAgent.includes('loon') || _url.searchParams.has('loon')) {
+            url = `${subProtocol}://${subConverter}/sub?target=loon&url=${encodeURIComponent(url)}&insert=false&config=${encodeURIComponent(subConfig)}&emoji=${subEmoji}&list=false&tfo=false&scv=${SCV}&fdn=false&sort=false&new_name=true`;
+            isBase64 = false;
         }
 
         try {
             let content;
             if ((!sub || sub == "") && isBase64 == true) {
-                content = await subAddresses(fakeHostName, fakeUserID, userAgent, newAddressesapi, newAddressescsv);
+                content = await subAddresses(fakeHostName, fakeUserID, userAgent, newAddressesapi, newAddressescsv); // 生成本地订阅内容
             } else {
                 const response = await fetch(url, {
                     headers: {
-                        'User-Agent': (isBase64 ? 'v2rayN' : UA) + atob('Q0YtV29ya2Vycy1lcGVpdXMvY21saXU='),
+                        'User-Agent': 'v2rayN' + atob('L2VwZWl1cyAoaHR0cHM6Ly9naXRodWIuY29tL2NtbGl1L2VwZWl1cyk='),
                     }
                 });
                 content = await response.text();
@@ -2278,7 +2278,7 @@ async function bestIP(request, env, txt = 'ADD.txt') {
                     'Accept': 'application/dns-json'
                 }
             });
-            
+
             if (response.ok) {
                 const data = await response.json();
                 if (data.Status === 0 && data.Answer && data.Answer.length > 0) {
