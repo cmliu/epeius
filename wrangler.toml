@@ -1,6 +1,6 @@
-name = "t20250807"
+name = "t20250907"
 main = "_worker.js"
-compatibility_date = "2025-08-07"
+compatibility_date = "2025-09-07"
 keep_vars = true
 
 [[kv_namespaces]]
