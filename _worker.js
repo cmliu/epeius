@@ -1199,7 +1199,7 @@ function subAddresses(host, pw, userAgent, newAddressesapi, newAddressescsv) {
         let 密码 = pw;
         if (!userAgent.includes('subconverter')) 密码 = encodeURIComponent(pw);
 
-        const 协议类型 = atob(啥啥啥_写的这是啥啊);
+        const 协议类型 = atob('dHJvamFu');
         const 特洛伊Link = `${协议类型}://${密码}@${address}:${port}?security=tls&sni=${伪装域名}&fp=random&type=ws&host=${伪装域名}&path=${encodeURIComponent(最终路径) + allowInsecure}&fragment=${encodeURIComponent('1,40-60,30-50,tlshello')}#${encodeURIComponent(addressid + 节点备注)}`;
 
         return 特洛伊Link;
